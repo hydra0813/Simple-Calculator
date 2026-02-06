@@ -3,597 +3,2087 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>工具合併：H型鋼算料 + 鐵窗分格</title>
+  <title>工程工具箱（H型鋼 + 鐵窗分格）</title>
   <style>
-    :root {
-      --bg:#ffffff;
-      --ink:#0f172a;
-      --muted:#475569;
-      --line:#e2e8f0;
-    }
+
+    :root{ --ink:#0f172a; --muted:#475569; --line:#e2e8f0; --card:#f8fafc; }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:var(--bg)}
-    .topbar{
-      position:sticky; top:0; z-index:20;
-      display:flex; gap:8px; align-items:center;
-      padding:10px 12px;
-      border-bottom:1px solid var(--line);
-      background:rgba(255,255,255,.92);
-      backdrop-filter:saturate(180%) blur(8px);
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;color:var(--ink)}
+    header{padding:14px 18px;border-bottom:1px solid var(--line)}
+    header b{font-size:16px}
+    .wrap{max-width:1200px;margin:0 auto;padding:14px}
+    .grid{display:grid;grid-template-columns: 420px 1fr;gap:14px}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+    h2{margin:0 0 10px 0;font-size:13px}
+    label{font-size:12px;color:var(--muted)}
+    input,select,textarea,button{font:inherit}
+    input,select,textarea{width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);background:#fff;outline:none}
+    textarea{min-height:120px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .field{display:grid;gap:6px;margin-bottom:10px}
+    .seg{display:flex;flex-wrap:wrap;gap:8px}
+    .seg button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 10px;font-size:12px;cursor:pointer}
+    .seg button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .actions button{border-radius:12px;padding:10px 12px;font-size:12px;cursor:pointer;border:1px solid var(--ink);background:var(--ink);color:#fff}
+    .actions button.secondary{background:#fff;color:var(--ink);border-color:var(--line)}
+    .mini{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .mini button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 10px;font-size:12px;cursor:pointer}
+    .mini button.primary{border-color:var(--ink);background:var(--ink);color:#fff}
+    .warn{font-size:12px;color:#b91c1c;line-height:1.45}
+    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:12px}
+    th,td{padding:10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+    th{background:#f1f5f9;color:var(--muted);font-weight:600}
+    th:first-child,td:first-child{text-align:left}
+    tr:last-child td{border-bottom:none}
+    .svgWrap{background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px}
+    .resultLine{margin-top:10px;font-size:12px;color:var(--ink)}
+    .resultLine span{color:var(--muted)}
+    .subcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;margin-top:10px}
+    .subcard h3{margin:0 0 8px 0;font-size:12px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#fff;font-size:12px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    .small{font-size:12px;color:var(--muted);line-height:1.45}
+    @media print{
+      header, .leftCol, .mini, .warn {display:none!important}
+      .wrap{max-width:none;padding:0}
+      .grid{grid-template-columns:1fr}
+      .card{border:none;background:#fff;padding:0}
+      .svgWrap{border:none;padding:0}
+      .subcard{border:none;padding:0}
     }
-    .brand{font-weight:700; font-size:14px; margin-right:6px; white-space:nowrap}
-    .tabs{display:flex; gap:8px; flex-wrap:wrap}
-    .tab{
-      appearance:none; border:1px solid var(--line); background:#fff;
-      padding:8px 10px; border-radius:999px; cursor:pointer;
-      font-size:12px; color:var(--ink);
-    }
-    .tab.active{background:var(--ink); color:#fff; border-color:var(--ink)}
-    .hint{margin-left:auto; font-size:12px; color:var(--muted); white-space:nowrap}
-    @media (max-width: 820px){ .hint{display:none} }
-    .stage{height:calc(100vh - 54px);}
-    iframe{width:100%;height:100%;border:none;display:block;background:#fff;}
+  
+
+  /* ---------- 共用：頁籤 ---------- */
+  :root{ --tabLine:#e2e8f0; --tabInk:#0f172a; --tabMuted:#475569; }
+  .tabs{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--tabLine);}
+  .tabsInner{max-width:1200px;margin:0 auto;display:flex;gap:8px;padding:10px 14px;align-items:center;}
+  .tabBtn{border:1px solid var(--tabLine);background:#fff;border-radius:999px;padding:10px 12px;font-size:13px;cursor:pointer;color:var(--tabInk)}
+  .tabBtn.active{background:var(--tabInk);color:#fff;border-color:var(--tabInk)}
+  .tabHint{margin-left:auto;color:var(--tabMuted);font-size:12px}
+  .app{display:none}
+  .app.active{display:block}
+
+  /* ---------- 鐵窗 app styles（scoped） ---------- */
+
+  /* ---------- 鐵窗分格（iron window） ---------- */
+  .iw { --ink:#0f172a; --muted:#475569; --line:#e2e8f0; --card:#f8fafc; color:var(--ink); }
+  .iw *{box-sizing:border-box}
+  .iw .iwWrap{max-width:1200px;margin:0 auto;padding:14px}
+  .iw .iwGrid{display:grid;grid-template-columns:420px 1fr;gap:14px}
+  .iw .iwCard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+  .iw h2{margin:0 0 10px 0;font-size:13px}
+  .iw label{font-size:12px;color:var(--muted)}
+  .iw input,.iw button{font:inherit}
+  .iw input{width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);background:#fff;outline:none}
+  .iw .iwRow2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .iw .iwField{display:grid;gap:6px;margin-bottom:10px}
+  .iw .iwBox{border:1px solid var(--line);border-radius:14px;padding:10px;margin-top:10px;background:#fff}
+  .iw .iwBox b{font-size:12px}
+  .iw .iwLine{font-size:12px;margin:4px 0}
+  .iw .iwSvgWrap{background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px}
+  .iw svg{width:100%;height:100%;display:block}
+
+  .iw .iwHeader{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .iw .iwHeader h2{margin:0;font-size:13px}
+  .iw .iwToggle{display:none;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border:1px solid var(--line);
+                border-radius:999px;background:#fff;cursor:pointer;font-size:12px;white-space:nowrap}
+  .iw .iwToggle:active{transform:scale(0.98)}
+
+  /* 手機：上下排列 + 單欄輸入 + 可摺疊 */
+  @media (max-width: 980px){
+    .iw .iwGrid{grid-template-columns:1fr}
+    .iw .iwRow2{grid-template-columns:1fr} /* 避免撐寬 */
+    .iw .iwToggle{display:inline-flex}
+    .iw .iwControls.collapsed{display:none}
+  }
+  .iw .iwStage{
+    height:70vh; min-height:460px;
+    border:1px solid var(--line); border-radius:16px; overflow:hidden; background:#fff;
+  }
+  @media (min-width: 981px){
+    .iw .iwStage{height:calc(100vh - 170px); min-height:560px;}
+  }
+
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <div class="brand">合併工具</div>
-    <div class="tabs">
-      <button class="tab active" id="tab_hbeam" type="button">H型鋼：施工圖 + 最省算料</button>
-      <button class="tab" id="tab_window" type="button">鐵窗分格：目標間距 + 鐵料估算</button>
+
+<div class="tabs">
+  <div class="tabsInner">
+    <button class="tabBtn" id="tab_window" type="button">鐵窗分格</button>
+    <button class="tabBtn" id="tab_beam" type="button">H型鋼算料</button>
+    <div class="tabHint">手機建議用「鐵窗分格」頁籤；可收起輸入放大圖面</div>
+  </div>
+</div>
+
+<section class="app" id="app_window">
+  
+<div class="iw">
+  <header style="padding:14px 18px;border-bottom:1px solid var(--line)">
+    <b style="font-size:16px">鐵窗分格（目標＝間距）</b>
+  </header>
+
+  <div class="iwWrap">
+    <div class="iwGrid">
+      <div class="iwCard">
+        <div class="iwHeader">
+          <h2>輸入</h2>
+          <button class="iwToggle" id="iw_toggleBtn" type="button" aria-expanded="true">收起輸入</button>
+        </div>
+
+        <div class="iwControls" id="iw_controls">
+          <div class="iwRow2">
+            <div class="iwField">
+              <label>總寬 W（mm）</label>
+              <input id="iw_W" type="number" value="3000">
+            </div>
+            <div class="iwField">
+              <label>總高 H（mm）</label>
+              <input id="iw_H" type="number" value="1200">
+            </div>
+          </div>
+
+          <div class="iwRow2">
+            <div class="iwField">
+              <label>外框 A（mm）</label>
+              <input id="iw_A" type="number" value="50">
+            </div>
+            <div class="iwField">
+              <label>內鐵 B（mm）</label>
+              <input id="iw_B" type="number" value="25">
+            </div>
+          </div>
+
+          <div class="iwField">
+            <label>目標間距（mm）</label>
+            <input id="iw_Gt" type="number" value="140">
+          </div>
+
+          <div class="iwBox">
+            <b>近似配置</b>
+            <div class="iwLine">更少：N=<span id="iw_nLess">-</span>，間距=<span id="iw_gLess">-</span> mm</div>
+            <div class="iwLine">更多：N=<span id="iw_nMore">-</span>，間距=<span id="iw_gMore">-</span> mm</div>
+          </div>
+
+          <div class="iwBox">
+            <b>採用配置</b>
+            <div class="iwLine">內鐵支數：<span id="iw_N">-</span></div>
+            <div class="iwLine">實際間距：<span id="iw_gap">-</span> mm</div>
+          </div>
+
+          <div class="iwBox">
+            <b>鐵料估算</b>
+            <div class="iwRow2" style="margin-top:8px">
+              <div class="iwField">
+                <label>外框鐵料長度（mm）</label>
+                <input id="iw_stickA" type="number" value="6000">
+              </div>
+              <div class="iwField">
+                <label>內鐵鐵料長度（mm）</label>
+                <input id="iw_stickB" type="number" value="6000">
+              </div>
+            </div>
+
+            <div class="iwLine" style="margin-top:6px">外框總長：<span id="iw_frameLen">-</span> mm</div>
+            <div class="iwLine">外框鐵料需求：<span id="iw_frameStick">-</span></div>
+
+            <div class="iwLine" style="margin-top:6px">單支內鐵長：<span id="iw_barLen">-</span> mm</div>
+            <div class="iwLine">內鐵總長：<span id="iw_barsLen">-</span> mm</div>
+            <div class="iwLine">內鐵材需求：<span id="iw_barsStick">-</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="iwCard">
+        <h2>圖面（尺寸標註永久顯示）</h2>
+        <div class="iwSvgWrap">
+          <div class="iwStage">
+            <svg id="iw_svg" xmlns="http://www.w3.org/2000/svg" aria-label="iron window">
+              <defs></defs>
+              <g id="iw_g"></g>
+            </svg>
+          </div>
+        </div>
+        <div class="small" style="margin-top:8px;color:var(--muted);font-size:12px;line-height:1.45">
+          手機可按「收起輸入」讓圖更大。
+        </div>
+      </div>
     </div>
-    <div class="hint">提示：列印 / SVG / PNG / CSV 等功能在各自工具內</div>
   </div>
+</div>
 
-  <div class="stage">
-    <iframe id="frame_hbeam"
-      sandbox="allow-scripts allow-same-origin allow-downloads allow-modals allow-forms allow-popups"
-      title="H型鋼算料"></iframe>
-    <iframe id="frame_window"
-      style="display:none"
-      sandbox="allow-scripts allow-same-origin allow-downloads allow-modals allow-forms allow-popups"
-      title="鐵窗分格"></iframe>
+</section>
+
+<section class="app" id="app_beam">
+  
+<header><b>H型鋼：施工圖 + 最省算料（柱/斜梁分開）</b></header>
+
+<div class="wrap">
+  <div class="grid">
+    <div class="card leftCol">
+      <h2>輸入（柱心基準）</h2>
+
+      <div class="field">
+        <label>單位（L / 高度）</label>
+        <select id="unit">
+          <option value="mm" selected>mm</option>
+          <option value="m">m</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>L（第一柱心 → 最後柱心 的水平距離）</label>
+        <input id="L" type="number" step="any" placeholder="例如 8000" />
+      </div>
+
+      <div class="field">
+        <label>H 規格（柱寬B→包外；梁深H→圖上厚度）</label>
+        <select id="hSpec">
+          <option value="H100">H100（100×100）</option>
+          <option value="H200">H200（200×200）</option>
+          <option value="CUSTOM">自訂 H / B（mm）</option>
+        </select>
+      </div>
+
+      <div id="customHB" style="display:none;">
+        <div class="row">
+          <div class="field">
+            <label>梁深 H（mm）</label>
+            <input id="beamH" type="number" step="any" placeholder="例如 200" />
+          </div>
+          <div class="field">
+            <label>柱寬 B（mm）</label>
+            <input id="colB" type="number" step="any" placeholder="例如 200" />
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>柱子配置方式</label>
+        <div class="seg">
+          <button id="mode_count" class="active" type="button">柱數 N（線性）</button>
+          <button id="mode_heights" type="button">自訂柱高（柱心自動均分）</button>
+        </div>
+      </div>
+
+      <div id="panel_count">
+        <div class="field">
+          <label>N（含兩端，≥2）</label>
+          <input id="N" type="number" min="2" step="1" placeholder="例如 4" />
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>低點柱高（線性）</label>
+            <input id="Hlow" type="number" step="any" placeholder="例如 1000" />
+          </div>
+          <div class="field">
+            <label>高點柱高（線性）</label>
+            <input id="Hhigh" type="number" step="any" placeholder="例如 1800" />
+          </div>
+        </div>
+      </div>
+
+      <div id="panel_heights" style="display:none;">
+        <div class="field">
+          <label>每根柱子高度（每行 1 筆；柱心 x 會在 0~L 之間自動均分）</label>
+          <textarea id="Hlist" placeholder="例如：
+1000
+1200
+1600
+1800"></textarea>
+        </div>
+      </div>
+
+      <div class="subcard">
+        <h3>自動算料設定</h3>
+
+        <div class="field">
+          <label>可用棒材長度（m）</label>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" id="stock9" checked> 9m</label>
+            <label class="chip"><input type="checkbox" id="stock10" checked> 10m</label>
+            <label class="chip"><input type="checkbox" id="stock12" checked> 12m</label>
+          </div>
+          <div class="small">最省優先序：<span class="mono">廢料最小 → 支數最少 → 購料總長最少</span></div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>斜梁支數（包外斜長）</label>
+            <input id="beamQty" type="number" min="0" step="1" placeholder="預設 1" />
+          </div>
+          <div class="field">
+            <label>柱子支數倍率（通常 1）</label>
+            <input id="colQtyMul" type="number" min="0" step="1" placeholder="預設 1" />
+          </div>
+        </div>
+
+        <div class="small">柱子算料長度＝<span class="mono">max(左接點高度, 右接點高度)</span>（切損忽略）。</div>
+      </div>
+
+      <div class="actions">
+        <button id="recalc" type="button">重新計算</button>
+        <button id="reset" class="secondary" type="button">清空</button>
+      </div>
+
+      <div id="warning" class="warn" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+      <h2>圖面 + 表格（尺寸標註永久顯示）</h2>
+
+      <div class="svgWrap"><div id="svgHost"></div></div>
+
+      <div class="mini">
+        <button class="primary" id="btn_print" type="button">列印 / PDF</button>
+        <button id="btn_svg" type="button">SVG</button>
+        <button id="btn_png" type="button">PNG</button>
+        <button id="btn_csv" type="button">CSV</button>
+      </div>
+
+      <div style="margin-top:12px" id="tableHost"></div>
+      <div id="resultHost" class="resultLine"></div>
+      <div id="cutHost"></div>
+    </div>
   </div>
+</div>
 
-  <!-- 以 Base64 儲存原始 HTML，避免 <template>/<textarea> 被內容中的 </script> / </textarea> 截斷 -->
-  <script type="text/plain" id="b64_hbeam">
-PCFkb2N0eXBlIGh0bWw+CjxodG1sIGxhbmc9InpoLUhhbnQiPgo8aGVhZD4KICA8bWV0YSBjaGFyc2V0PSJ1dGYtOCIgLz4KICA8bWV0YSBuYW1lPSJ2aWV3
-cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLCBpbml0aWFsLXNjYWxlPTEiIC8+CiAgPHRpdGxlPkjlnovpi7zvvJrmlr3lt6XlnJYgKyDmnIDn
-nIHnrpfmlpnvvIjmn7Ev5pac5qKB5YiG6ZaL77yJPC90aXRsZT4KICA8c3R5bGU+CiAgICA6cm9vdHsgLS1pbms6IzBmMTcyYTsgLS1tdXRlZDojNDc1NTY5
-OyAtLWxpbmU6I2UyZThmMDsgLS1jYXJkOiNmOGZhZmM7IH0KICAgICp7Ym94LXNpemluZzpib3JkZXItYm94fQogICAgYm9keXttYXJnaW46MDtmb250LWZh
-bWlseTpzeXN0ZW0tdWksLWFwcGxlLXN5c3RlbSwiU2Vnb2UgVUkiLCJOb3RvIFNhbnMgVEMiLCJNaWNyb3NvZnQgSmhlbmdIZWkiLHNhbnMtc2VyaWY7Y29s
-b3I6dmFyKC0taW5rKX0KICAgIGhlYWRlcntwYWRkaW5nOjE0cHggMThweDtib3JkZXItYm90dG9tOjFweCBzb2xpZCB2YXIoLS1saW5lKX0KICAgIGhlYWRl
-ciBie2ZvbnQtc2l6ZToxNnB4fQogICAgLndyYXB7bWF4LXdpZHRoOjEyMDBweDttYXJnaW46MCBhdXRvO3BhZGRpbmc6MTRweH0KICAgIC5ncmlke2Rpc3Bs
-YXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6IDQyMHB4IDFmcjtnYXA6MTRweH0KICAgIEBtZWRpYSAobWF4LXdpZHRoOjk4MHB4KXsuZ3JpZHtncmlk
-LXRlbXBsYXRlLWNvbHVtbnM6MWZyfX0KICAgIC5jYXJke2JhY2tncm91bmQ6dmFyKC0tY2FyZCk7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1saW5lKTtib3Jk
-ZXItcmFkaXVzOjE2cHg7cGFkZGluZzoxMnB4fQogICAgaDJ7bWFyZ2luOjAgMCAxMHB4IDA7Zm9udC1zaXplOjEzcHh9CiAgICBsYWJlbHtmb250LXNpemU6
-MTJweDtjb2xvcjp2YXIoLS1tdXRlZCl9CiAgICBpbnB1dCxzZWxlY3QsdGV4dGFyZWEsYnV0dG9ue2ZvbnQ6aW5oZXJpdH0KICAgIGlucHV0LHNlbGVjdCx0
-ZXh0YXJlYXt3aWR0aDoxMDAlO3BhZGRpbmc6MTBweDtib3JkZXItcmFkaXVzOjEycHg7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1saW5lKTtiYWNrZ3JvdW5k
-OiNmZmY7b3V0bGluZTpub25lfQogICAgdGV4dGFyZWF7bWluLWhlaWdodDoxMjBweDtyZXNpemU6dmVydGljYWx9CiAgICAucm93e2Rpc3BsYXk6Z3JpZDtn
-cmlkLXRlbXBsYXRlLWNvbHVtbnM6MWZyIDFmcjtnYXA6MTBweH0KICAgIC5maWVsZHtkaXNwbGF5OmdyaWQ7Z2FwOjZweDttYXJnaW4tYm90dG9tOjEwcHh9
-CiAgICAuc2Vne2Rpc3BsYXk6ZmxleDtmbGV4LXdyYXA6d3JhcDtnYXA6OHB4fQogICAgLnNlZyBidXR0b257Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1saW5l
-KTtiYWNrZ3JvdW5kOiNmZmY7Ym9yZGVyLXJhZGl1czo5OTlweDtwYWRkaW5nOjhweCAxMHB4O2ZvbnQtc2l6ZToxMnB4O2N1cnNvcjpwb2ludGVyfQogICAg
-LnNlZyBidXR0b24uYWN0aXZle2JhY2tncm91bmQ6dmFyKC0taW5rKTtjb2xvcjojZmZmO2JvcmRlci1jb2xvcjp2YXIoLS1pbmspfQogICAgLmFjdGlvbnN7
-ZGlzcGxheTpmbGV4O2dhcDo4cHg7ZmxleC13cmFwOndyYXA7bWFyZ2luLXRvcDo2cHh9CiAgICAuYWN0aW9ucyBidXR0b257Ym9yZGVyLXJhZGl1czoxMnB4
-O3BhZGRpbmc6MTBweCAxMnB4O2ZvbnQtc2l6ZToxMnB4O2N1cnNvcjpwb2ludGVyO2JvcmRlcjoxcHggc29saWQgdmFyKC0taW5rKTtiYWNrZ3JvdW5kOnZh
-cigtLWluayk7Y29sb3I6I2ZmZn0KICAgIC5hY3Rpb25zIGJ1dHRvbi5zZWNvbmRhcnl7YmFja2dyb3VuZDojZmZmO2NvbG9yOnZhcigtLWluayk7Ym9yZGVy
-LWNvbG9yOnZhcigtLWxpbmUpfQogICAgLm1pbml7ZGlzcGxheTpmbGV4O2dhcDo4cHg7ZmxleC13cmFwOndyYXA7bWFyZ2luLXRvcDoxMHB4fQogICAgLm1p
-bmkgYnV0dG9ue2JvcmRlcjoxcHggc29saWQgdmFyKC0tbGluZSk7YmFja2dyb3VuZDojZmZmO2JvcmRlci1yYWRpdXM6MTJweDtwYWRkaW5nOjhweCAxMHB4
-O2ZvbnQtc2l6ZToxMnB4O2N1cnNvcjpwb2ludGVyfQogICAgLm1pbmkgYnV0dG9uLnByaW1hcnl7Ym9yZGVyLWNvbG9yOnZhcigtLWluayk7YmFja2dyb3Vu
-ZDp2YXIoLS1pbmspO2NvbG9yOiNmZmZ9CiAgICAud2Fybntmb250LXNpemU6MTJweDtjb2xvcjojYjkxYzFjO2xpbmUtaGVpZ2h0OjEuNDV9CiAgICB0YWJs
-ZXt3aWR0aDoxMDAlO2JvcmRlci1jb2xsYXBzZTpjb2xsYXBzZTtiYWNrZ3JvdW5kOiNmZmY7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1saW5lKTtib3JkZXIt
-cmFkaXVzOjE0cHg7b3ZlcmZsb3c6aGlkZGVuO2ZvbnQtc2l6ZToxMnB4fQogICAgdGgsdGR7cGFkZGluZzoxMHB4O2JvcmRlci1ib3R0b206MXB4IHNvbGlk
-IHZhcigtLWxpbmUpO3RleHQtYWxpZ246cmlnaHQ7d2hpdGUtc3BhY2U6bm93cmFwfQogICAgdGh7YmFja2dyb3VuZDojZjFmNWY5O2NvbG9yOnZhcigtLW11
-dGVkKTtmb250LXdlaWdodDo2MDB9CiAgICB0aDpmaXJzdC1jaGlsZCx0ZDpmaXJzdC1jaGlsZHt0ZXh0LWFsaWduOmxlZnR9CiAgICB0cjpsYXN0LWNoaWxk
-IHRke2JvcmRlci1ib3R0b206bm9uZX0KICAgIC5zdmdXcmFwe2JhY2tncm91bmQ6I2ZmZjtib3JkZXI6MXB4IHNvbGlkIHZhcigtLWxpbmUpO2JvcmRlci1y
-YWRpdXM6MTZweDtwYWRkaW5nOjEwcHh9CiAgICAucmVzdWx0TGluZXttYXJnaW4tdG9wOjEwcHg7Zm9udC1zaXplOjEycHg7Y29sb3I6dmFyKC0taW5rKX0K
-ICAgIC5yZXN1bHRMaW5lIHNwYW57Y29sb3I6dmFyKC0tbXV0ZWQpfQogICAgLnN1YmNhcmR7YmFja2dyb3VuZDojZmZmO2JvcmRlcjoxcHggc29saWQgdmFy
-KC0tbGluZSk7Ym9yZGVyLXJhZGl1czoxNHB4O3BhZGRpbmc6MTBweDttYXJnaW4tdG9wOjEwcHh9CiAgICAuc3ViY2FyZCBoM3ttYXJnaW46MCAwIDhweCAw
-O2ZvbnQtc2l6ZToxMnB4fQogICAgLmNoaXBze2Rpc3BsYXk6ZmxleDtmbGV4LXdyYXA6d3JhcDtnYXA6OHB4fQogICAgLmNoaXB7ZGlzcGxheTpmbGV4O2Fs
-aWduLWl0ZW1zOmNlbnRlcjtnYXA6NnB4O2JvcmRlcjoxcHggc29saWQgdmFyKC0tbGluZSk7Ym9yZGVyLXJhZGl1czo5OTlweDtwYWRkaW5nOjZweCAxMHB4
-O2JhY2tncm91bmQ6I2ZmZjtmb250LXNpemU6MTJweH0KICAgIC5tb25ve2ZvbnQtZmFtaWx5OnVpLW1vbm9zcGFjZSxTRk1vbm8tUmVndWxhcixNZW5sbyxN
-b25hY28sQ29uc29sYXMsIkxpYmVyYXRpb24gTW9ubyIsIkNvdXJpZXIgTmV3Iixtb25vc3BhY2V9CiAgICAuc21hbGx7Zm9udC1zaXplOjEycHg7Y29sb3I6
-dmFyKC0tbXV0ZWQpO2xpbmUtaGVpZ2h0OjEuNDV9CiAgICBAbWVkaWEgcHJpbnR7CiAgICAgIGhlYWRlciwgLmxlZnRDb2wsIC5taW5pLCAud2FybiB7ZGlz
-cGxheTpub25lIWltcG9ydGFudH0KICAgICAgLndyYXB7bWF4LXdpZHRoOm5vbmU7cGFkZGluZzowfQogICAgICAuZ3JpZHtncmlkLXRlbXBsYXRlLWNvbHVt
-bnM6MWZyfQogICAgICAuY2FyZHtib3JkZXI6bm9uZTtiYWNrZ3JvdW5kOiNmZmY7cGFkZGluZzowfQogICAgICAuc3ZnV3JhcHtib3JkZXI6bm9uZTtwYWRk
-aW5nOjB9CiAgICAgIC5zdWJjYXJke2JvcmRlcjpub25lO3BhZGRpbmc6MH0KICAgIH0KICA8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5Pgo8aGVhZGVyPjxiPkjl
-novpi7zvvJrmlr3lt6XlnJYgKyDmnIDnnIHnrpfmlpnvvIjmn7Ev5pac5qKB5YiG6ZaL77yJPC9iPjwvaGVhZGVyPgoKPGRpdiBjbGFzcz0id3JhcCI+CiAg
-PGRpdiBjbGFzcz0iZ3JpZCI+CiAgICA8ZGl2IGNsYXNzPSJjYXJkIGxlZnRDb2wiPgogICAgICA8aDI+6Ly45YWl77yI5p+x5b+D5Z+65rqW77yJPC9oMj4K
-CiAgICAgIDxkaXYgY2xhc3M9ImZpZWxkIj4KICAgICAgICA8bGFiZWw+5Zau5L2N77yITCAvIOmrmOW6pu+8iTwvbGFiZWw+CiAgICAgICAgPHNlbGVjdCBp
-ZD0idW5pdCI+CiAgICAgICAgICA8b3B0aW9uIHZhbHVlPSJtbSIgc2VsZWN0ZWQ+bW08L29wdGlvbj4KICAgICAgICAgIDxvcHRpb24gdmFsdWU9Im0iPm08
-L29wdGlvbj4KICAgICAgICA8L3NlbGVjdD4KICAgICAgPC9kaXY+CgogICAgICA8ZGl2IGNsYXNzPSJmaWVsZCI+CiAgICAgICAgPGxhYmVsPkzvvIjnrKzk
-uIDmn7Hlv4Mg4oaSIOacgOW+jOafseW/gyDnmoTmsLTlubPot53pm6LvvIk8L2xhYmVsPgogICAgICAgIDxpbnB1dCBpZD0iTCIgdHlwZT0ibnVtYmVyIiBz
-dGVwPSJhbnkiIHBsYWNlaG9sZGVyPSLkvovlpoIgODAwMCIgLz4KICAgICAgPC9kaXY+CgogICAgICA8ZGl2IGNsYXNzPSJmaWVsZCI+CiAgICAgICAgPGxh
-YmVsPkgg6KaP5qC877yI5p+x5a+sQuKGkuWMheWklu+8m+aigea3sUjihpLlnJbkuIrljprluqbvvIk8L2xhYmVsPgogICAgICAgIDxzZWxlY3QgaWQ9ImhT
-cGVjIj4KICAgICAgICAgIDxvcHRpb24gdmFsdWU9IkgxMDAiPkgxMDDvvIgxMDDDlzEwMO+8iTwvb3B0aW9uPgogICAgICAgICAgPG9wdGlvbiB2YWx1ZT0i
-SDIwMCI+SDIwMO+8iDIwMMOXMjAw77yJPC9vcHRpb24+CiAgICAgICAgICA8b3B0aW9uIHZhbHVlPSJDVVNUT00iPuiHquiogiBIIC8gQu+8iG1t77yJPC9v
-cHRpb24+CiAgICAgICAgPC9zZWxlY3Q+CiAgICAgIDwvZGl2PgoKICAgICAgPGRpdiBpZD0iY3VzdG9tSEIiIHN0eWxlPSJkaXNwbGF5Om5vbmU7Ij4KICAg
-ICAgICA8ZGl2IGNsYXNzPSJyb3ciPgogICAgICAgICAgPGRpdiBjbGFzcz0iZmllbGQiPgogICAgICAgICAgICA8bGFiZWw+5qKB5rexIEjvvIhtbe+8iTwv
-bGFiZWw+CiAgICAgICAgICAgIDxpbnB1dCBpZD0iYmVhbUgiIHR5cGU9Im51bWJlciIgc3RlcD0iYW55IiBwbGFjZWhvbGRlcj0i5L6L5aaCIDIwMCIgLz4K
-ICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPGRpdiBjbGFzcz0iZmllbGQiPgogICAgICAgICAgICA8bGFiZWw+5p+x5a+sIELvvIhtbe+8iTwvbGFiZWw+
-CiAgICAgICAgICAgIDxpbnB1dCBpZD0iY29sQiIgdHlwZT0ibnVtYmVyIiBzdGVwPSJhbnkiIHBsYWNlaG9sZGVyPSLkvovlpoIgMjAwIiAvPgogICAgICAg
-ICAgPC9kaXY+CiAgICAgICAgPC9kaXY+CiAgICAgIDwvZGl2PgoKICAgICAgPGRpdiBjbGFzcz0iZmllbGQiPgogICAgICAgIDxsYWJlbD7mn7HlrZDphY3n
-va7mlrnlvI88L2xhYmVsPgogICAgICAgIDxkaXYgY2xhc3M9InNlZyI+CiAgICAgICAgICA8YnV0dG9uIGlkPSJtb2RlX2NvdW50IiBjbGFzcz0iYWN0aXZl
-IiB0eXBlPSJidXR0b24iPuafseaVuCBO77yI57ea5oCn77yJPC9idXR0b24+CiAgICAgICAgICA8YnV0dG9uIGlkPSJtb2RlX2hlaWdodHMiIHR5cGU9ImJ1
-dHRvbiI+6Ieq6KiC5p+x6auY77yI5p+x5b+D6Ieq5YuV5Z2H5YiG77yJPC9idXR0b24+CiAgICAgICAgPC9kaXY+CiAgICAgIDwvZGl2PgoKICAgICAgPGRp
-diBpZD0icGFuZWxfY291bnQiPgogICAgICAgIDxkaXYgY2xhc3M9ImZpZWxkIj4KICAgICAgICAgIDxsYWJlbD5O77yI5ZCr5YWp56uv77yM4omlMu+8iTwv
-bGFiZWw+CiAgICAgICAgICA8aW5wdXQgaWQ9Ik4iIHR5cGU9Im51bWJlciIgbWluPSIyIiBzdGVwPSIxIiBwbGFjZWhvbGRlcj0i5L6L5aaCIDQiIC8+CiAg
-ICAgICAgPC9kaXY+CiAgICAgICAgPGRpdiBjbGFzcz0icm93Ij4KICAgICAgICAgIDxkaXYgY2xhc3M9ImZpZWxkIj4KICAgICAgICAgICAgPGxhYmVsPuS9
-jum7nuafsemrmO+8iOe3muaAp++8iTwvbGFiZWw+CiAgICAgICAgICAgIDxpbnB1dCBpZD0iSGxvdyIgdHlwZT0ibnVtYmVyIiBzdGVwPSJhbnkiIHBsYWNl
-aG9sZGVyPSLkvovlpoIgMTAwMCIgLz4KICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPGRpdiBjbGFzcz0iZmllbGQiPgogICAgICAgICAgICA8bGFiZWw+
-6auY6bue5p+x6auY77yI57ea5oCn77yJPC9sYWJlbD4KICAgICAgICAgICAgPGlucHV0IGlkPSJIaGlnaCIgdHlwZT0ibnVtYmVyIiBzdGVwPSJhbnkiIHBs
-YWNlaG9sZGVyPSLkvovlpoIgMTgwMCIgLz4KICAgICAgICAgIDwvZGl2PgogICAgICAgIDwvZGl2PgogICAgICA8L2Rpdj4KCiAgICAgIDxkaXYgaWQ9InBh
-bmVsX2hlaWdodHMiIHN0eWxlPSJkaXNwbGF5Om5vbmU7Ij4KICAgICAgICA8ZGl2IGNsYXNzPSJmaWVsZCI+CiAgICAgICAgICA8bGFiZWw+5q+P5qC55p+x
-5a2Q6auY5bqm77yI5q+P6KGMIDEg562G77yb5p+x5b+DIHgg5pyD5ZyoIDB+TCDkuYvplpPoh6rli5XlnYfliIbvvIk8L2xhYmVsPgogICAgICAgICAgPHRl
-eHRhcmVhIGlkPSJIbGlzdCIgcGxhY2Vob2xkZXI9IuS+i+Wmgu+8mgoxMDAwCjEyMDAKMTYwMAoxODAwIj48L3RleHRhcmVhPgogICAgICAgIDwvZGl2Pgog
-ICAgICA8L2Rpdj4KCiAgICAgIDxkaXYgY2xhc3M9InN1YmNhcmQiPgogICAgICAgIDxoMz7oh6rli5XnrpfmlpnoqK3lrpo8L2gzPgoKICAgICAgICA8ZGl2
-IGNsYXNzPSJmaWVsZCI+CiAgICAgICAgICA8bGFiZWw+5Y+v55So5qOS5p2Q6ZW35bqm77yIbe+8iTwvbGFiZWw+CiAgICAgICAgICA8ZGl2IGNsYXNzPSJj
-aGlwcyI+CiAgICAgICAgICAgIDxsYWJlbCBjbGFzcz0iY2hpcCI+PGlucHV0IHR5cGU9ImNoZWNrYm94IiBpZD0ic3RvY2s5IiBjaGVja2VkPiA5bTwvbGFi
-ZWw+CiAgICAgICAgICAgIDxsYWJlbCBjbGFzcz0iY2hpcCI+PGlucHV0IHR5cGU9ImNoZWNrYm94IiBpZD0ic3RvY2sxMCIgY2hlY2tlZD4gMTBtPC9sYWJl
-bD4KICAgICAgICAgICAgPGxhYmVsIGNsYXNzPSJjaGlwIj48aW5wdXQgdHlwZT0iY2hlY2tib3giIGlkPSJzdG9jazEyIiBjaGVja2VkPiAxMm08L2xhYmVs
-PgogICAgICAgICAgPC9kaXY+CiAgICAgICAgICA8ZGl2IGNsYXNzPSJzbWFsbCI+5pyA55yB5YSq5YWI5bqP77yaPHNwYW4gY2xhc3M9Im1vbm8iPuW7ouaW
-meacgOWwjyDihpIg5pSv5pW45pyA5bCRIOKGkiDos7zmlpnnuL3plbfmnIDlsJE8L3NwYW4+PC9kaXY+CiAgICAgICAgPC9kaXY+CgogICAgICAgIDxkaXYg
-Y2xhc3M9InJvdyI+CiAgICAgICAgICA8ZGl2IGNsYXNzPSJmaWVsZCI+CiAgICAgICAgICAgIDxsYWJlbD7mlpzmooHmlK/mlbjvvIjljIXlpJbmlpzplbfv
-vIk8L2xhYmVsPgogICAgICAgICAgICA8aW5wdXQgaWQ9ImJlYW1RdHkiIHR5cGU9Im51bWJlciIgbWluPSIwIiBzdGVwPSIxIiBwbGFjZWhvbGRlcj0i6aCQ
-6KitIDEiIC8+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIDxkaXYgY2xhc3M9ImZpZWxkIj4KICAgICAgICAgICAgPGxhYmVsPuafseWtkOaUr+aVuOWA
-jeeOh++8iOmAmuW4uCAx77yJPC9sYWJlbD4KICAgICAgICAgICAgPGlucHV0IGlkPSJjb2xRdHlNdWwiIHR5cGU9Im51bWJlciIgbWluPSIwIiBzdGVwPSIx
-IiBwbGFjZWhvbGRlcj0i6aCQ6KitIDEiIC8+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICA8L2Rpdj4KCiAgICAgICAgPGRpdiBjbGFzcz0ic21hbGwiPuaf
-seWtkOeul+aWmemVt+W6pu+8nTxzcGFuIGNsYXNzPSJtb25vIj5tYXgo5bem5o6l6bue6auY5bqmLCDlj7PmjqXpu57pq5jluqYpPC9zcGFuPu+8iOWIh+aQ
-jeW/veeVpe+8ieOAgjwvZGl2PgogICAgICA8L2Rpdj4KCiAgICAgIDxkaXYgY2xhc3M9ImFjdGlvbnMiPgogICAgICAgIDxidXR0b24gaWQ9InJlY2FsYyIg
-dHlwZT0iYnV0dG9uIj7ph43mlrDoqIjnrpc8L2J1dHRvbj4KICAgICAgICA8YnV0dG9uIGlkPSJyZXNldCIgY2xhc3M9InNlY29uZGFyeSIgdHlwZT0iYnV0
-dG9uIj7muIXnqbo8L2J1dHRvbj4KICAgICAgPC9kaXY+CgogICAgICA8ZGl2IGlkPSJ3YXJuaW5nIiBjbGFzcz0id2FybiIgc3R5bGU9ImRpc3BsYXk6bm9u
-ZTsiPjwvZGl2PgogICAgPC9kaXY+CgogICAgPGRpdiBjbGFzcz0iY2FyZCI+CiAgICAgIDxoMj7lnJbpnaIgKyDooajmoLzvvIjlsLrlr7jmqJnoqLvmsLjk
-uYXpoa/npLrvvIk8L2gyPgoKICAgICAgPGRpdiBjbGFzcz0ic3ZnV3JhcCI+PGRpdiBpZD0ic3ZnSG9zdCI+PC9kaXY+PC9kaXY+CgogICAgICA8ZGl2IGNs
-YXNzPSJtaW5pIj4KICAgICAgICA8YnV0dG9uIGNsYXNzPSJwcmltYXJ5IiBpZD0iYnRuX3ByaW50IiB0eXBlPSJidXR0b24iPuWIl+WNsCAvIFBERjwvYnV0
-dG9uPgogICAgICAgIDxidXR0b24gaWQ9ImJ0bl9zdmciIHR5cGU9ImJ1dHRvbiI+U1ZHPC9idXR0b24+CiAgICAgICAgPGJ1dHRvbiBpZD0iYnRuX3BuZyIg
-dHlwZT0iYnV0dG9uIj5QTkc8L2J1dHRvbj4KICAgICAgICA8YnV0dG9uIGlkPSJidG5fY3N2IiB0eXBlPSJidXR0b24iPkNTVjwvYnV0dG9uPgogICAgICA8
-L2Rpdj4KCiAgICAgIDxkaXYgc3R5bGU9Im1hcmdpbi10b3A6MTJweCIgaWQ9InRhYmxlSG9zdCI+PC9kaXY+CiAgICAgIDxkaXYgaWQ9InJlc3VsdEhvc3Qi
-IGNsYXNzPSJyZXN1bHRMaW5lIj48L2Rpdj4KICAgICAgPGRpdiBpZD0iY3V0SG9zdCI+PC9kaXY+CiAgICA8L2Rpdj4KICA8L2Rpdj4KPC9kaXY+Cgo8c2Ny
-aXB0PgooKCkgPT4gewogIGNvbnN0ICQgPSAoaWQpID0+IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKGlkKTsKICBjb25zdCBudW0gPSAodikgPT4gTnVtYmVy
-KHYpOwogIGNvbnN0IGlzRiA9ICh2KSA9PiBOdW1iZXIuaXNGaW5pdGUodikgJiYgIU51bWJlci5pc05hTih2KTsKICBjb25zdCByYWQyZGVnID0gKHIpID0+
-IHIgKiAxODAgLyBNYXRoLlBJOwoKICBsZXQgbW9kZSA9ICJjb3VudCI7CiAgbGV0IGxhc3RSZXMgPSBudWxsOwogIGNvbnN0IHNob3dEaW1zID0gdHJ1ZTsK
-CiAgZnVuY3Rpb24gc2V0TW9kZShtKXsKICAgIG1vZGUgPSBtOwogICAgJCgibW9kZV9jb3VudCIpLmNsYXNzTGlzdC50b2dnbGUoImFjdGl2ZSIsIG09PT0i
-Y291bnQiKTsKICAgICQoIm1vZGVfaGVpZ2h0cyIpLmNsYXNzTGlzdC50b2dnbGUoImFjdGl2ZSIsIG09PT0iaGVpZ2h0cyIpOwogICAgJCgicGFuZWxfY291
-bnQiKS5zdHlsZS5kaXNwbGF5ICAgPSAobT09PSJjb3VudCIpID8gIiIgOiAibm9uZSI7CiAgICAkKCJwYW5lbF9oZWlnaHRzIikuc3R5bGUuZGlzcGxheSA9
-IChtPT09ImhlaWdodHMiKSA/ICIiIDogIm5vbmUiOwogICAgcmVjYWxjKCk7CiAgfQoKICBmdW5jdGlvbiBwYXJzZUhlaWdodHModGV4dCl7CiAgICByZXR1
-cm4gdGV4dC5zcGxpdCgvW1xzLF0rLykubWFwKHM9PnMudHJpbSgpKS5maWx0ZXIoQm9vbGVhbikubWFwKE51bWJlcikuZmlsdGVyKGlzRik7CiAgfQoKICBm
-dW5jdGlvbiBnZXRIQigpewogICAgY29uc3Qgc3BlYyA9ICQoImhTcGVjIikudmFsdWU7CiAgICBpZihzcGVjID09PSAiSDEwMCIpIHJldHVybiB7IEg6IDEw
-MCwgQjogMTAwLCBsYWJlbDogIkgxMDDDlzEwMCIgfTsKICAgIGlmKHNwZWMgPT09ICJIMjAwIikgcmV0dXJuIHsgSDogMjAwLCBCOiAyMDAsIGxhYmVsOiAi
-SDIwMMOXMjAwIiB9OwogICAgY29uc3QgSCA9IE1hdGgubWF4KDEsIG51bSgkKCJiZWFtSCIpLnZhbHVlKSB8fCAwKTsKICAgIGNvbnN0IEIgPSBNYXRoLm1h
-eCgxLCBudW0oJCgiY29sQiIpLnZhbHVlKSB8fCAwKTsKICAgIHJldHVybiB7IEgsIEIsIGxhYmVsOiBgSCR7SH3DlyR7Qn1gIH07CiAgfQoKICBmdW5jdGlv
-biBmbXRMZW4obW0sIHVuaXQpewogICAgaWYoIWlzRihtbSkpIHJldHVybiAi4oCUIjsKICAgIHJldHVybiAodW5pdD09PSJtIiA/IChtbS8xMDAwKS50b0Zp
-eGVkKDQpIDogKG1tKS50b0ZpeGVkKDEpKSArICIgIiArIHVuaXQ7CiAgfQoKICBmdW5jdGlvbiBidWlsZFBpZWNld2lzZShwb2ludHMpewogICAgY29uc3Qg
-cHRzID0gcG9pbnRzLnNsaWNlKCkuc29ydCgoYSxiKT0+YS54LWIueCk7CiAgICBjb25zdCBuID0gcHRzLmxlbmd0aDsKICAgIHJldHVybiBmdW5jdGlvbiB5
-QXQoeCl7CiAgICAgIGlmKG4gPT09IDApIHJldHVybiBOYU47CiAgICAgIGlmKG4gPT09IDEpIHJldHVybiBwdHNbMF0ueTsKCiAgICAgIGlmKHggPD0gcHRz
-WzBdLngpewogICAgICAgIGNvbnN0IHAwID0gcHRzWzBdLCBwMSA9IHB0c1sxXTsKICAgICAgICBjb25zdCB0ID0gKHggLSBwMC54KSAvIChwMS54IC0gcDAu
-eCk7CiAgICAgICAgcmV0dXJuIHAwLnkgKyAocDEueSAtIHAwLnkpICogdDsKICAgICAgfQogICAgICBpZih4ID49IHB0c1tuLTFdLngpewogICAgICAgIGNv
-bnN0IHAwID0gcHRzW24tMl0sIHAxID0gcHRzW24tMV07CiAgICAgICAgY29uc3QgdCA9ICh4IC0gcDAueCkgLyAocDEueCAtIHAwLngpOwogICAgICAgIHJl
-dHVybiBwMC55ICsgKHAxLnkgLSBwMC55KSAqIHQ7CiAgICAgIH0KICAgICAgZm9yKGxldCBpPTA7aTxuLTE7aSsrKXsKICAgICAgICBjb25zdCBhID0gcHRz
-W2ldLCBiID0gcHRzW2krMV07CiAgICAgICAgaWYoeCA+PSBhLnggJiYgeCA8PSBiLngpewogICAgICAgICAgY29uc3QgdCA9ICh4IC0gYS54KSAvIChiLngg
-LSBhLngpOwogICAgICAgICAgcmV0dXJuIGEueSArIChiLnkgLSBhLnkpICogdDsKICAgICAgICB9CiAgICAgIH0KICAgICAgcmV0dXJuIE5hTjsKICAgIH07
-CiAgfQoKICBmdW5jdGlvbiBwb2x5bGluZUxlbmd0aChwdHMpewogICAgbGV0IHN1bSA9IDA7CiAgICBmb3IobGV0IGk9MDtpPHB0cy5sZW5ndGgtMTtpKysp
-ewogICAgICBzdW0gKz0gTWF0aC5oeXBvdChwdHNbaSsxXS54IC0gcHRzW2ldLngsIHB0c1tpKzFdLnkgLSBwdHNbaV0ueSk7CiAgICB9CiAgICByZXR1cm4g
-c3VtOwogIH0KCiAgZnVuY3Rpb24gY29tcHV0ZSgpewogICAgY29uc3QgdW5pdCA9ICQoInVuaXQiKS52YWx1ZTsKICAgIGNvbnN0IG11bCAgPSAodW5pdD09
-PSJtIikgPyAxMDAwIDogMTsKCiAgICBjb25zdCBMX2luID0gbnVtKCQoIkwiKS52YWx1ZSk7CiAgICBjb25zdCBMID0gTF9pbiAqIG11bDsKCiAgICBjb25z
-dCBoYiA9IGdldEhCKCk7CiAgICBjb25zdCBiZWFtSCA9IGhiLkg7CiAgICBjb25zdCBjb2xCICA9IGhiLkI7CgogICAgY29uc3Qgd2FybmluZ3MgPSBbXTsK
-ICAgIGlmKCFpc0YoTCkgfHwgTCA8PSAwKSB3YXJuaW5ncy5wdXNoKCJMIOW/hemgiCA+IDAiKTsKCiAgICBsZXQgcG9pbnRzID0gW107CgogICAgaWYobW9k
-ZSA9PT0gImhlaWdodHMiKXsKICAgICAgY29uc3QgaHMgPSBwYXJzZUhlaWdodHMoJCgiSGxpc3QiKS52YWx1ZSkubWFwKHYgPT4gdiptdWwpOwogICAgICBp
-Zihocy5sZW5ndGggPCAyKSB3YXJuaW5ncy5wdXNoKCLoh6roqILmn7Hpq5joh7PlsJEgMiDnrYbvvIjlkKvlhannq6/vvIkiKTsKICAgICAgaWYoaXNGKEwp
-ICYmIEw+MCAmJiBocy5sZW5ndGggPj0gMil7CiAgICAgICAgY29uc3QgTiA9IGhzLmxlbmd0aDsKICAgICAgICBjb25zdCBzZWcgPSBOIC0gMTsKICAgICAg
-ICBmb3IobGV0IGk9MDtpPE47aSsrKXsKICAgICAgICAgIHBvaW50cy5wdXNoKHsgeDooTCppKS9zZWcsIHk6aHNbaV0gfSk7CiAgICAgICAgfQogICAgICB9
-CiAgICB9IGVsc2UgewogICAgICBjb25zdCBOcmF3ID0gbnVtKCQoIk4iKS52YWx1ZSk7CiAgICAgIGNvbnN0IE4gPSBNYXRoLm1heCgyLCBNYXRoLmZsb29y
-KE5yYXcgfHwgMCkpOwogICAgICBpZighaXNGKE5yYXcpIHx8IE5yYXcgPCAyKSB3YXJuaW5ncy5wdXNoKCJOIOW/hemgiCDiiaUgMiIpOwoKICAgICAgY29u
-c3QgSGxvdyA9IG51bSgkKCJIbG93IikudmFsdWUpICogbXVsOwogICAgICBjb25zdCBIaGlnaCA9IG51bSgkKCJIaGlnaCIpLnZhbHVlKSAqIG11bDsKICAg
-ICAgaWYoIWlzRihIbG93KSB8fCAhaXNGKEhoaWdoKSkgd2FybmluZ3MucHVzaCgi5L2O6bue5p+x6auYIC8g6auY6bue5p+x6auYIOmcgOimgeWhq+aVuOWA
-vCIpOwoKICAgICAgaWYoaXNGKEwpICYmIEw+MCAmJiBpc0YoSGxvdykgJiYgaXNGKEhoaWdoKSAmJiBOPj0yKXsKICAgICAgICBjb25zdCBzZWcgPSBOIC0g
-MTsKICAgICAgICBmb3IobGV0IGk9MDtpPE47aSsrKXsKICAgICAgICAgIHBvaW50cy5wdXNoKHsgeDooTCppKS9zZWcsIHk6IEhsb3cgKyAoSGhpZ2ggLSBI
-bG93KSAqIChpL3NlZykgfSk7CiAgICAgICAgfQogICAgICB9CiAgICB9CgogICAgY29uc3QgeUF0ID0gYnVpbGRQaWVjZXdpc2UocG9pbnRzKTsKCiAgICBj
-b25zdCB4T3V0TCA9IC1jb2xCLzI7CiAgICBjb25zdCB4T3V0UiA9IEwgKyBjb2xCLzI7CiAgICBjb25zdCB5T3V0TCA9IHlBdCh4T3V0TCk7CiAgICBjb25z
-dCB5T3V0UiA9IHlBdCh4T3V0Uik7CiAgICBjb25zdCBMX291dCA9IHhPdXRSIC0geE91dEw7CgogICAgY29uc3QgcGF0aFB0cyA9IFt7eDp4T3V0TCwgeTp5
-T3V0TH0sIC4uLnBvaW50cywge3g6eE91dFIsIHk6eU91dFJ9XTsKICAgIGNvbnN0IHNsYW50X291dCA9IHBvbHlsaW5lTGVuZ3RoKHBhdGhQdHMpOwoKICAg
-IGNvbnN0IHNsb3BlID0gKHlPdXRSIC0geU91dEwpIC8gKHhPdXRSIC0geE91dEwpOwogICAgY29uc3Qgc2xvcGVQY3QgPSBzbG9wZSAqIDEwMDsKICAgIGNv
-bnN0IGFuZ2xlRGVnID0gcmFkMmRlZyhNYXRoLmF0YW4yKCh5T3V0UiAtIHlPdXRMKSwgKHhPdXRSIC0geE91dEwpKSk7CgogICAgLy8g4pyFIOafseWtkOeu
-l+aWmemVt+W6pu+8mm1heCjlt6bmjqXpu54sIOWPs+aOpem7nikKICAgIGNvbnN0IGNvbHMgPSBwb2ludHMubWFwKChwLGkpPT57CiAgICAgIGNvbnN0IGR4
-ID0gKGk9PT0wKSA/IE5hTiA6IChwLnggLSBwb2ludHNbaS0xXS54KTsKCiAgICAgIGNvbnN0IHhMID0gcC54IC0gY29sQi8yOwogICAgICBjb25zdCB4UiA9
-IHAueCArIGNvbEIvMjsKICAgICAgY29uc3QgeUwgPSB5QXQoeEwpOwogICAgICBjb25zdCB5UiA9IHlBdCh4Uik7CiAgICAgIGNvbnN0IGNvbE1hdExlbiA9
-IE1hdGgubWF4KHlMLCB5Uik7CgogICAgICBjb25zdCBpc0xhc3QgPSAoaSA9PT0gcG9pbnRzLmxlbmd0aCAtIDEpOwogICAgICBjb25zdCB4Q29ubiA9IHAu
-eCArIChpc0xhc3QgPyAtY29sQi8yIDogK2NvbEIvMik7CiAgICAgIGNvbnN0IGRoQ29ubkNlbnRlciA9IHlBdCh4Q29ubikgLSBwLnk7CgogICAgICByZXR1
-cm4gewogICAgICAgIGluZGV4OiBpKzEsCiAgICAgICAgeF9tbTogcC54LAogICAgICAgIGR4X21tOiBkeCwKICAgICAgICBjb2xfbGVuX2NlbnRlcl9tbTog
-cC55LAogICAgICAgIGNvbF9sZW5fbWF0ZXJpYWxfbW06IGNvbE1hdExlbiwKICAgICAgICBkaF9jb25uX2NlbnRlcl9tbTogZGhDb25uQ2VudGVyCiAgICAg
-IH07CiAgICB9KTsKCiAgICByZXR1cm4geyB1bml0LCBMLCBoYiwgYmVhbUgsIGNvbEIsIHdhcm5pbmdzLAogICAgICAgICAgICAgeE91dEwsIHhPdXRSLCB5
-T3V0TCwgeU91dFIsIExfb3V0LCBzbGFudF9vdXQsCiAgICAgICAgICAgICBzbG9wZVBjdCwgYW5nbGVEZWcsIHBvaW50cywgY29scywgeUF0IH07CiAgfQoK
-ICBmdW5jdGlvbiByZW5kZXJUYWJsZShyZXMpewogICAgY29uc3QgdSA9IHJlcy51bml0OwogICAgY29uc3Qgcm93cyA9IHJlcy5jb2xzLm1hcChjID0+IGAK
-ICAgICAgPHRyPgogICAgICAgIDx0ZD4ke2MuaW5kZXh9PC90ZD4KICAgICAgICA8dGQ+JHtpc0YoYy5keF9tbSkgPyBmbXRMZW4oYy5keF9tbSwgdSkgOiAi
-4oCUIn08L3RkPgogICAgICAgIDx0ZD4ke2ZtdExlbihjLmNvbF9sZW5fbWF0ZXJpYWxfbW0sIHUpfTwvdGQ+CiAgICAgICAgPHRkPiR7Zm10TGVuKGMuZGhf
-Y29ubl9jZW50ZXJfbW0sIHUpfTwvdGQ+CiAgICAgIDwvdHI+CiAgICBgKS5qb2luKCIiKTsKICAgICQoInRhYmxlSG9zdCIpLmlubmVySFRNTCA9IGAKICAg
-ICAgPHRhYmxlPgogICAgICAgIDx0aGVhZD4KICAgICAgICAgIDx0cj4KICAgICAgICAgICAgPHRoPuafseW6jzwvdGg+CiAgICAgICAgICAgIDx0aD7mn7Ho
-t53vvIjkuK3lv4Mt5Lit5b+D77yJPC90aD4KICAgICAgICAgICAgPHRoPuafsemVt+W6pjwvdGg+CiAgICAgICAgICAgIDx0aD7mjqXpu54t5Lit5b+DIOmr
-mOS9juW3rjwvdGg+CiAgICAgICAgICA8L3RyPgogICAgICAgIDwvdGhlYWQ+CiAgICAgICAgPHRib2R5PiR7cm93c308L3Rib2R5PgogICAgICA8L3RhYmxl
-PgogICAgYDsKICB9CgogIGZ1bmN0aW9uIHJlbmRlclNWRyhyZXMpewogICAgY29uc3QgVz0yOTcsIEg9MjEwLCBtYXJnaW49MTA7CiAgICBjb25zdCBkcmF3
-WD1tYXJnaW4sIGRyYXdZPW1hcmdpbiwgZHJhd1c9Vy1tYXJnaW4qMiwgZHJhd0g9SC1tYXJnaW4qMjsKICAgIGNvbnN0IHRpdGxlSCA9IDEyLCBkaW1IID0g
-MzQ7CiAgICBjb25zdCBnZW9tWCA9IGRyYXdYLCBnZW9tWSA9IGRyYXdZICsgdGl0bGVILCBnZW9tVyA9IGRyYXdXLCBnZW9tSCA9IGRyYXdIIC0gdGl0bGVI
-IC0gZGltSDsKCiAgICBjb25zdCBjb2xCPXJlcy5jb2xCLCBiZWFtSD1yZXMuYmVhbUg7CgogICAgY29uc3QgeE1pbiA9IHJlcy54T3V0TCwgeE1heCA9IHJl
-cy54T3V0UjsKICAgIGNvbnN0IHlNYXhUb3AgPSBNYXRoLm1heChyZXMueU91dEwsIHJlcy55T3V0UiwgLi4ucmVzLnBvaW50cy5tYXAocD0+cC55KSkgKyBi
-ZWFtSDsKICAgIGNvbnN0IHlNaW4gPSAwLCB5TWF4ID0gTWF0aC5tYXgoMSwgeU1heFRvcCk7CgogICAgY29uc3Qgc3ggPSBnZW9tVyAvICh4TWF4IC0geE1p
-bik7CiAgICBjb25zdCBzeSA9IGdlb21IIC8gKHlNYXggLSB5TWluKTsKICAgIGNvbnN0IHMgID0gTWF0aC5taW4oc3gsIHN5KTsKCiAgICBjb25zdCB1c2Vk
-VyA9ICh4TWF4IC0geE1pbikgKiBzOwogICAgY29uc3QgdXNlZEggPSAoeU1heCAtIHlNaW4pICogczsKICAgIGNvbnN0IHhQYWQgPSAoZ2VvbVcgLSB1c2Vk
-VykvMjsKICAgIGNvbnN0IHlQYWQgPSAoZ2VvbUggLSB1c2VkSCkvMjsKCiAgICBmdW5jdGlvbiBYKHgpeyByZXR1cm4gZ2VvbVggKyB4UGFkICsgKHggLSB4
-TWluKSAqIHM7IH0KICAgIGZ1bmN0aW9uIFkoeSl7IHJldHVybiBnZW9tWSArIHlQYWQgKyB1c2VkSCAtICh5IC0geU1pbikgKiBzOyB9CgogICAgY29uc3Qg
-eUJhc2UgPSBZKDApOwogICAgY29uc3QgZGltQmFzZSA9IGRyYXdZICsgZHJhd0ggLSA2OwogICAgY29uc3QgZGltWTIgICA9IGRpbUJhc2UgLSAyOwogICAg
-Y29uc3QgZGltWTEgICA9IGRpbUJhc2UgLSAxMjsKICAgIGNvbnN0IHNlZ0RpbVkgPSBkaW1CYXNlIC0gMjI7CgogICAgY29uc3QgYm90dG9tUHRzID0gW3t4
-OnJlcy54T3V0TCwgeTpyZXMueU91dEx9LCAuLi5yZXMucG9pbnRzLCB7eDpyZXMueE91dFIsIHk6cmVzLnlPdXRSfV07CiAgICBjb25zdCB0b3BQdHMgICAg
-PSBib3R0b21QdHMubWFwKHAgPT4gKHt4OnAueCwgeTpwLnkgKyBiZWFtSH0pKTsKICAgIGNvbnN0IGJvdHRvbVN0ciA9IGJvdHRvbVB0cy5tYXAocCA9PiBg
-JHtYKHAueCl9LCR7WShwLnkpfWApLmpvaW4oIiAiKTsKICAgIGNvbnN0IHRvcFN0ciAgICA9IHRvcFB0cy5zbGljZSgpLnJldmVyc2UoKS5tYXAocCA9PiBg
-JHtYKHAueCl9LCR7WShwLnkpfWApLmpvaW4oIiAiKTsKICAgIGNvbnN0IGJlYW1Qb2x5ID0gYDxwb2x5Z29uIHBvaW50cz0iJHtib3R0b21TdHJ9ICR7dG9w
-U3RyfSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMGYxNzJhIiBzdHJva2Utd2lkdGg9IjEuMCIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgLz5gOwoKICAgIGNv
-bnN0IGNvbHNTdmcgPSByZXMucG9pbnRzLm1hcCgocCk9PnsKICAgICAgY29uc3QgbGVmdCA9IHAueCAtIGNvbEIvMiwgcmlnaHQ9IHAueCArIGNvbEIvMjsK
-ICAgICAgcmV0dXJuIGAKICAgICAgICA8cmVjdCB4PSIke1gobGVmdCl9IiB5PSIke1kocC55KX0iIHdpZHRoPSIkeyhyaWdodC1sZWZ0KSpzfSIgaGVpZ2h0
-PSIkeyhwLnktMCkqc30iIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzBmMTcyYSIgc3Ryb2tlLXdpZHRoPSIwLjgiLz4KICAgICAgICA8Y2lyY2xlIGN4PSIke1go
-cC54KX0iIGN5PSIke1kocC55KX0iIHI9IjEuMCIgZmlsbD0iIzBmMTcyYSIvPgogICAgICBgOwogICAgfSkuam9pbigiIik7CgogICAgY29uc3QgbHJTaWRl
-TWlkID0gKHNob3dEaW1zICYmIHJlcy5wb2ludHMubGVuZ3RoIDw9IDEyKSA/IHJlcy5wb2ludHMubWFwKChwKT0+ewogICAgICBjb25zdCB4TCA9IHAueCAt
-IGNvbEIvMiwgeFIgPSBwLnggKyBjb2xCLzI7CiAgICAgIGNvbnN0IHlMID0gcmVzLnlBdCh4TCksIHlSID0gcmVzLnlBdCh4Uik7CiAgICAgIGNvbnN0IHlN
-aWRMID0geUwvMiwgeU1pZFIgPSB5Ui8yOwogICAgICBjb25zdCBvdXQgPSBjb2xCICogMC4zNTsKICAgICAgY29uc3QgeFRleHRMID0geEwgLSBvdXQsIHhU
-ZXh0UiA9IHhSICsgb3V0OwogICAgICByZXR1cm4gYAogICAgICAgIDxsaW5lIHgxPSIke1goeEwpfSIgeTE9IiR7WSh5TCl9IiB4Mj0iJHtYKHhUZXh0TCl9
-IiB5Mj0iJHtZKHlNaWRMKX0iIHN0cm9rZT0iIzBmMTcyYSIgc3Ryb2tlLXdpZHRoPSIwLjI1Ii8+CiAgICAgICAgPHRleHQgeD0iJHtYKHhUZXh0TCktMX0i
-IHk9IiR7WSh5TWlkTCkrMX0iIGZvbnQtc2l6ZT0iMy4wIiB0ZXh0LWFuY2hvcj0iZW5kIiBmaWxsPSIjMGYxNzJhIj7lt6YgJHtmbXRMZW4oeUwsIHJlcy51
-bml0KX08L3RleHQ+CgogICAgICAgIDxsaW5lIHgxPSIke1goeFIpfSIgeTE9IiR7WSh5Uil9IiB4Mj0iJHtYKHhUZXh0Uil9IiB5Mj0iJHtZKHlNaWRSKX0i
-IHN0cm9rZT0iIzBmMTcyYSIgc3Ryb2tlLXdpZHRoPSIwLjI1Ii8+CiAgICAgICAgPHRleHQgeD0iJHtYKHhUZXh0UikrMX0iIHk9IiR7WSh5TWlkUikrMX0i
-IGZvbnQtc2l6ZT0iMy4wIiB0ZXh0LWFuY2hvcj0ic3RhcnQiIGZpbGw9IiMwZjE3MmEiPuWPsyAke2ZtdExlbih5UiwgcmVzLnVuaXQpfTwvdGV4dD4KICAg
-ICAgYDsKICAgIH0pLmpvaW4oIiIpIDogIiI7CgogICAgY29uc3QgcDFzID0ge3g6IFgocmVzLnhPdXRMKSwgeTogWShyZXMueU91dEwpfTsKICAgIGNvbnN0
-IHAycyA9IHt4OiBYKHJlcy54T3V0UiksIHk6IFkocmVzLnlPdXRSKX07CiAgICBjb25zdCBkeHMgPSBwMnMueCAtIHAxcy54LCBkeXMgPSBwMnMueSAtIHAx
-cy55OwogICAgY29uc3QgbGVucyA9IE1hdGguaHlwb3QoZHhzLCBkeXMpIHx8IDE7CiAgICBjb25zdCBzbnggPSAtZHlzL2xlbnMsIHNueSA9IGR4cy9sZW5z
-OwogICAgY29uc3Qgb2ZmID0gMjI7CiAgICBjb25zdCBBID0geyBkMTp7eDpwMXMueCtzbngqb2ZmLCB5OnAxcy55K3NueSpvZmZ9LCBkMjp7eDpwMnMueCtz
-bngqb2ZmLCB5OnAycy55K3NueSpvZmZ9IH07CiAgICBjb25zdCBCID0geyBkMTp7eDpwMXMueC1zbngqb2ZmLCB5OnAxcy55LXNueSpvZmZ9LCBkMjp7eDpw
-MnMueC1zbngqb2ZmLCB5OnAycy55LXNueSpvZmZ9IH07CiAgICBjb25zdCBiZXN0ID0gKCgoQS5kMS55K0EuZDIueSkvMikgPCAoKEIuZDEueStCLmQyLnkp
-LzIpKSA/IEEgOiBCOwogICAgY29uc3QgdHggPSAoYmVzdC5kMS54ICsgYmVzdC5kMi54KS8yOwogICAgY29uc3QgdHkgPSAoYmVzdC5kMS55ICsgYmVzdC5k
-Mi55KS8yIC0gMzsKCiAgICBjb25zdCB4SCA9IHJlcy54T3V0TCArIDAuMjAgKiAocmVzLnhPdXRSIC0gcmVzLnhPdXRMKTsKICAgIGNvbnN0IHlIID0gcmVz
-LnlBdCh4SCk7CiAgICBjb25zdCBIeCA9IFgoeEgpLCBIeTEgPSBZKHlIKSwgSHkyID0gWSh5SCArIGJlYW1IKTsKCiAgICBjb25zdCBzZWdEaW1zID0gKHNo
-b3dEaW1zICYmIHJlcy5wb2ludHMubGVuZ3RoIDw9IDE0KSA/IHJlcy5wb2ludHMuc2xpY2UoMSkubWFwKChwLGkpPT57CiAgICAgIGNvbnN0IHByZXYgPSBy
-ZXMucG9pbnRzW2ldOwogICAgICBjb25zdCB4MSA9IFgocHJldi54KSwgeDIgPSBYKHAueCk7CiAgICAgIGNvbnN0IGxhYmVsID0gZm10TGVuKHAueCAtIHBy
-ZXYueCwgcmVzLnVuaXQpOwogICAgICByZXR1cm4gYAogICAgICAgIDxsaW5lIHgxPSIke3gxfSIgeTE9IiR7c2VnRGltWX0iIHgyPSIke3gyfSIgeTI9IiR7
-c2VnRGltWX0iIHN0cm9rZT0iIzBmMTcyYSIgc3Ryb2tlLXdpZHRoPSIwLjQ1IgogICAgICAgICAgbWFya2VyLXN0YXJ0PSJ1cmwoI3RpY2spIiBtYXJrZXIt
-ZW5kPSJ1cmwoI3RpY2spIi8+CiAgICAgICAgPHRleHQgeD0iJHsoeDEreDIpLzJ9IiB5PSIke3NlZ0RpbVktMn0iIGZvbnQtc2l6ZT0iMy4wIiB0ZXh0LWFu
-Y2hvcj0ibWlkZGxlIiBmaWxsPSIjMGYxNzJhIj4ke2xhYmVsfTwvdGV4dD4KICAgICAgYDsKICAgIH0pLmpvaW4oIiIpIDogIiI7CgogICAgY29uc3QgeE91
-dEwgPSBYKHJlcy54T3V0TCksIHhPdXRSID0gWChyZXMueE91dFIpOwogICAgY29uc3QgeEMxID0gWCgwKSwgeEMyID0gWChyZXMuTCk7CgogICAgY29uc3Qg
-dGl0bGUgPSBgJHtyZXMuaGIubGFiZWx944CAfOOAgOaWnOW6piAke2lzRihyZXMuc2xvcGVQY3QpP3Jlcy5zbG9wZVBjdC50b0ZpeGVkKDMpOiLigJQifSUg
-LyAke2lzRihyZXMuYW5nbGVEZWcpP3Jlcy5hbmdsZURlZy50b0ZpeGVkKDIpOiLigJQifcKwYDsKCiAgICAkKCJzdmdIb3N0IikuaW5uZXJIVE1MID0gYAog
-ICAgICA8c3ZnIGlkPSJkcmF3aW5nU3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAke1d9ICR7SH0iIHdpZHRo
-PSIxMDAlIiBoZWlnaHQ9ImF1dG8iPgogICAgICAgIDxkZWZzPgogICAgICAgICAgPG1hcmtlciBpZD0idGljayIgbWFya2VyV2lkdGg9IjYiIG1hcmtlckhl
-aWdodD0iNiIgcmVmWD0iMyIgcmVmWT0iMyIgb3JpZW50PSJhdXRvIiBtYXJrZXJVbml0cz0ic3Ryb2tlV2lkdGgiPgogICAgICAgICAgICA8cGF0aCBkPSJN
-MCw2IEw2LDAiIHN0cm9rZT0iIzBmMTcyYSIgc3Ryb2tlLXdpZHRoPSIxLjAiIGZpbGw9Im5vbmUiLz4KICAgICAgICAgIDwvbWFya2VyPgogICAgICAgIDwv
-ZGVmcz4KCiAgICAgICAgPHJlY3QgeD0iJHttYXJnaW59IiB5PSIke21hcmdpbn0iIHdpZHRoPSIke1ctbWFyZ2luKjJ9IiBoZWlnaHQ9IiR7SC1tYXJnaW4q
-Mn0iIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzBmMTcyYSIgc3Ryb2tlLXdpZHRoPSIwLjYiLz4KICAgICAgICA8cmVjdCB4PSIke2RyYXdYfSIgeT0iJHtkcmF3
-WX0iIHdpZHRoPSIke2RyYXdXfSIgaGVpZ2h0PSIke2RyYXdIfSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMGYxNzJhIiBzdHJva2Utd2lkdGg9IjAuMzUiLz4K
-CiAgICAgICAgPHRleHQgeD0iJHtkcmF3WH0iIHk9IiR7ZHJhd1krNn0iIGZvbnQtc2l6ZT0iMy42IiBmaWxsPSIjMGYxNzJhIj4ke3RpdGxlfTwvdGV4dD4K
-CiAgICAgICAgJHtjb2xzU3ZnfQogICAgICAgICR7YmVhbVBvbHl9CgogICAgICAgICR7c2VnRGltc30KCiAgICAgICAgPGxpbmUgeDE9IiR7eE91dEx9IiB5
-MT0iJHtkaW1ZMX0iIHgyPSIke3hPdXRSfSIgeTI9IiR7ZGltWTF9IiBzdHJva2U9IiMwZjE3MmEiIHN0cm9rZS13aWR0aD0iMC41NSIKICAgICAgICAgIG1h
-cmtlci1zdGFydD0idXJsKCN0aWNrKSIgbWFya2VyLWVuZD0idXJsKCN0aWNrKSIvPgogICAgICAgIDxsaW5lIHgxPSIke3hPdXRMfSIgeTE9IiR7eUJhc2V9
-IiB4Mj0iJHt4T3V0TH0iIHkyPSIke2RpbVkxLTF9IiBzdHJva2U9IiMwZjE3MmEiIHN0cm9rZS13aWR0aD0iMC4zIi8+CiAgICAgICAgPGxpbmUgeDE9IiR7
-eE91dFJ9IiB5MT0iJHt5QmFzZX0iIHgyPSIke3hPdXRSfSIgeTI9IiR7ZGltWTEtMX0iIHN0cm9rZT0iIzBmMTcyYSIgc3Ryb2tlLXdpZHRoPSIwLjMiLz4K
-ICAgICAgICA8dGV4dCB4PSIkeyh4T3V0TCt4T3V0UikvMn0iIHk9IiR7ZGltWTErNH0iIGZvbnQtc2l6ZT0iMy40IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBm
-aWxsPSIjMGYxNzJhIj4KICAgICAgICAgIOWMheWkliA9ICR7Zm10TGVuKHJlcy5MX291dCwgcmVzLnVuaXQpfQogICAgICAgIDwvdGV4dD4KCiAgICAgICAg
-PGxpbmUgeDE9IiR7eEMxfSIgeTE9IiR7ZGltWTJ9IiB4Mj0iJHt4QzJ9IiB5Mj0iJHtkaW1ZMn0iIHN0cm9rZT0iIzBmMTcyYSIgc3Ryb2tlLXdpZHRoPSIw
-LjU1IgogICAgICAgICAgbWFya2VyLXN0YXJ0PSJ1cmwoI3RpY2spIiBtYXJrZXItZW5kPSJ1cmwoI3RpY2spIi8+CiAgICAgICAgPGxpbmUgeDE9IiR7eEMx
-fSIgeTE9IiR7eUJhc2V9IiB4Mj0iJHt4QzF9IiB5Mj0iJHtkaW1ZMi0xfSIgc3Ryb2tlPSIjMGYxNzJhIiBzdHJva2Utd2lkdGg9IjAuMyIvPgogICAgICAg
-IDxsaW5lIHgxPSIke3hDMn0iIHkxPSIke3lCYXNlfSIgeDI9IiR7eEMyfSIgeTI9IiR7ZGltWTItMX0iIHN0cm9rZT0iIzBmMTcyYSIgc3Ryb2tlLXdpZHRo
-PSIwLjMiLz4KICAgICAgICA8dGV4dCB4PSIkeyh4QzEreEMyKS8yfSIgeT0iJHtkaW1ZMis0fSIgZm9udC1zaXplPSIzLjQiIHRleHQtYW5jaG9yPSJtaWRk
-bGUiIGZpbGw9IiMwZjE3MmEiPgogICAgICAgICAg5p+x5b+DLeafseW/gyA9ICR7Zm10TGVuKHJlcy5MLCByZXMudW5pdCl9CiAgICAgICAgPC90ZXh0PgoK
-ICAgICAgICA8bGluZSB4MT0iJHtwMXMueH0iIHkxPSIke3Axcy55fSIgeDI9IiR7YmVzdC5kMS54fSIgeTI9IiR7YmVzdC5kMS55fSIgc3Ryb2tlPSIjMGYx
-NzJhIiBzdHJva2Utd2lkdGg9IjAuMyIvPgogICAgICAgIDxsaW5lIHgxPSIke3Aycy54fSIgeTE9IiR7cDJzLnl9IiB4Mj0iJHtiZXN0LmQyLnh9IiB5Mj0i
-JHtiZXN0LmQyLnl9IiBzdHJva2U9IiMwZjE3MmEiIHN0cm9rZS13aWR0aD0iMC4zIi8+CiAgICAgICAgPGxpbmUgeDE9IiR7YmVzdC5kMS54fSIgeTE9IiR7
-YmVzdC5kMS55fSIgeDI9IiR7YmVzdC5kMi54fSIgeTI9IiR7YmVzdC5kMi55fSIgc3Ryb2tlPSIjMGYxNzJhIiBzdHJva2Utd2lkdGg9IjAuNTUiCiAgICAg
-ICAgICBtYXJrZXItc3RhcnQ9InVybCgjdGljaykiIG1hcmtlci1lbmQ9InVybCgjdGljaykiLz4KICAgICAgICA8dGV4dCB4PSIke3R4fSIgeT0iJHt0eX0i
-IGZvbnQtc2l6ZT0iMy40IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMGYxNzJhIj4KICAgICAgICAgIOWMheWkluaWnOmVtyA9ICR7Zm10TGVuKHJl
-cy5zbGFudF9vdXQsIHJlcy51bml0KX0KICAgICAgICA8L3RleHQ+CgogICAgICAgIDxsaW5lIHgxPSIke0h4fSIgeTE9IiR7SHkxfSIgeDI9IiR7SHh9IiB5
-Mj0iJHtIeTJ9IiBzdHJva2U9IiMwZjE3MmEiIHN0cm9rZS13aWR0aD0iMC41NSIKICAgICAgICAgIG1hcmtlci1zdGFydD0idXJsKCN0aWNrKSIgbWFya2Vy
-LWVuZD0idXJsKCN0aWNrKSIvPgogICAgICAgIDx0ZXh0IHg9IiR7SHgrNn0iIHk9IiR7KEh5MStIeTIpLzIrMX0iIGZvbnQtc2l6ZT0iMy40IiB0ZXh0LWFu
-Y2hvcj0ic3RhcnQiIGZpbGw9IiMwZjE3MmEiPgogICAgICAgICAgSCA9ICR7YmVhbUh9IG1tCiAgICAgICAgPC90ZXh0PgoKICAgICAgICAke2xyU2lkZU1p
-ZH0KICAgICAgPC9zdmc+CiAgICBgOwogIH0KCiAgLy8gLS0tLS0tLS0tLSDnrpfmlpnvvIjmnIDnnIHvvJrlsI/ku7bmlbjnsr7norrop6PvvIkgLS0tLS0t
-LS0tLQogIGZ1bmN0aW9uIGdldFN0b2NrU2l6ZXNNTSgpewogICAgY29uc3QgYXJyID0gW107CiAgICBpZigkKCJzdG9jazkiKS5jaGVja2VkKSBhcnIucHVz
-aCg5MDAwKTsKICAgIGlmKCQoInN0b2NrMTAiKS5jaGVja2VkKSBhcnIucHVzaCgxMDAwMCk7CiAgICBpZigkKCJzdG9jazEyIikuY2hlY2tlZCkgYXJyLnB1
-c2goMTIwMDApOwogICAgcmV0dXJuIGFyci5zb3J0KChhLGIpPT5hLWIpOwogIH0KCiAgZnVuY3Rpb24gc2NvcmVQbGFuKHBsYW4peyByZXR1cm4gW3BsYW4u
-dG90YWxXYXN0ZSwgcGxhbi50b3RhbEJhcnMsIHBsYW4udG90YWxQdXJjaGFzZWRdOyB9CiAgZnVuY3Rpb24gYmV0dGVyU2NvcmUoYSxiKXsKICAgIGZvcihs
-ZXQgaT0wO2k8YS5sZW5ndGg7aSsrKXsKICAgICAgaWYoYVtpXSAhPT0gYltpXSkgcmV0dXJuIGFbaV0gPCBiW2ldOwogICAgfQogICAgcmV0dXJuIGZhbHNl
-OwogIH0KCiAgZnVuY3Rpb24gZmluYWxpemVCYXJzKGJhcnMpewogICAgbGV0IHRvdGFsV2FzdGUgPSAwOwogICAgbGV0IHRvdGFsUHVyY2hhc2VkID0gMDsK
-ICAgIGNvbnN0IGNvdW50QnlTaXplID0ge307CiAgICBmb3IoY29uc3QgYiBvZiBiYXJzKXsKICAgICAgYi53YXN0ZSA9IGIucmVtYWluOwogICAgICB0b3Rh
-bFdhc3RlICs9IGIud2FzdGU7CiAgICAgIHRvdGFsUHVyY2hhc2VkICs9IGIuc2l6ZTsKICAgICAgY291bnRCeVNpemVbYi5zaXplXSA9IChjb3VudEJ5U2l6
-ZVtiLnNpemVdfHwwKSArIDE7CiAgICB9CgogICAgY29uc3QgcGF0dGVybnMgPSBuZXcgTWFwKCk7CiAgICBmb3IoY29uc3QgYiBvZiBiYXJzKXsKICAgICAg
-Y29uc3QgY3V0c1NvcnRlZCA9IGIuY3V0cy5zbGljZSgpLnNvcnQoKGEsYik9PmItYSk7CiAgICAgIGNvbnN0IGtleSA9IGAke2Iuc2l6ZX18JHtjdXRzU29y
-dGVkLmpvaW4oIisiKX18dyR7Yi53YXN0ZX1gOwogICAgICBpZighcGF0dGVybnMuaGFzKGtleSkpewogICAgICAgIHBhdHRlcm5zLnNldChrZXksIHsgY291
-bnQ6MCwgc2l6ZTpiLnNpemUsIGN1dHM6Y3V0c1NvcnRlZCwgd2FzdGU6Yi53YXN0ZSB9KTsKICAgICAgfQogICAgICBwYXR0ZXJucy5nZXQoa2V5KS5jb3Vu
-dCArPSAxOwogICAgfQoKICAgIHJldHVybiB7CiAgICAgIG9rOnRydWUsCiAgICAgIGJhcnMsCiAgICAgIHBhdHRlcm5zOiBBcnJheS5mcm9tKHBhdHRlcm5z
-LnZhbHVlcygpKS5zb3J0KChhLGIpPT57CiAgICAgICAgaWYoYi5jb3VudCAhPT0gYS5jb3VudCkgcmV0dXJuIGIuY291bnQgLSBhLmNvdW50OwogICAgICAg
-IHJldHVybiBhLndhc3RlIC0gYi53YXN0ZTsKICAgICAgfSksCiAgICAgIHRvdGFsV2FzdGUsCiAgICAgIHRvdGFsUHVyY2hhc2VkLAogICAgICB0b3RhbEJh
-cnM6IGJhcnMubGVuZ3RoLAogICAgICBjb3VudEJ5U2l6ZQogICAgfTsKICB9CgogIC8vIOWVn+eZvOW8j++8mkJlc3QtRml0IERlY3JlYXNpbmcKICBmdW5j
-dGlvbiBwYWNrUGllY2VzQmVzdEZpdChwaWVjZXMsIHN0b2NrU2l6ZXMpewogICAgY29uc3QgcHMgPSBwaWVjZXMuc2xpY2UoKS5zb3J0KChhLGIpPT5iLWEp
-OwogICAgY29uc3QgYmFycyA9IFtdOwoKICAgIGZvcihjb25zdCBwIG9mIHBzKXsKICAgICAgbGV0IGJlc3RJZHggPSAtMTsKICAgICAgbGV0IGJlc3RSZW1h
-aW5BZnRlciA9IEluZmluaXR5OwoKICAgICAgZm9yKGxldCBpPTA7aTxiYXJzLmxlbmd0aDtpKyspewogICAgICAgIGNvbnN0IGIgPSBiYXJzW2ldOwogICAg
-ICAgIGlmKGIucmVtYWluID49IHApewogICAgICAgICAgY29uc3QgcmEgPSBiLnJlbWFpbiAtIHA7CiAgICAgICAgICBpZihyYSA8IGJlc3RSZW1haW5BZnRl
-cil7CiAgICAgICAgICAgIGJlc3RSZW1haW5BZnRlciA9IHJhOwogICAgICAgICAgICBiZXN0SWR4ID0gaTsKICAgICAgICAgIH0KICAgICAgICB9CiAgICAg
-IH0KCiAgICAgIGlmKGJlc3RJZHggPj0gMCl7CiAgICAgICAgY29uc3QgYiA9IGJhcnNbYmVzdElkeF07CiAgICAgICAgYi5jdXRzLnB1c2gocCk7CiAgICAg
-ICAgYi5yZW1haW4gLT0gcDsKICAgICAgICBjb250aW51ZTsKICAgICAgfQoKICAgICAgbGV0IGNob3NlbiA9IG51bGw7CiAgICAgIGZvcihjb25zdCBzIG9m
-IHN0b2NrU2l6ZXMpewogICAgICAgIGlmKHMgPj0gcCl7CiAgICAgICAgICBjb25zdCByZW1haW5BZnRlciA9IHMgLSBwOwogICAgICAgICAgaWYoIWNob3Nl
-biB8fCByZW1haW5BZnRlciA8IGNob3Nlbi5yZW1haW5BZnRlciB8fCAocmVtYWluQWZ0ZXIgPT09IGNob3Nlbi5yZW1haW5BZnRlciAmJiBzIDwgY2hvc2Vu
-LnNpemUpKXsKICAgICAgICAgICAgY2hvc2VuID0geyBzaXplOnMsIHJlbWFpbkFmdGVyIH07CiAgICAgICAgICB9CiAgICAgICAgfQogICAgICB9CiAgICAg
-IGlmKCFjaG9zZW4pIHJldHVybiB7IG9rOmZhbHNlLCByZWFzb246YOmcgOaxguautemVtyAke3B9bW0g6LaF6YGO5Y+v55So5qOS5p2Q5pyA5aSn6ZW35bqm
-YCB9OwoKICAgICAgYmFycy5wdXNoKHsgc2l6ZTogY2hvc2VuLnNpemUsIHJlbWFpbjogY2hvc2VuLnNpemUgLSBwLCBjdXRzOltwXSB9KTsKICAgIH0KCiAg
-ICByZXR1cm4gZmluYWxpemVCYXJzKGJhcnMpOwogIH0KCiAgLy8g57K+56K66Kej77yaQnJhbmNoICYgQm91bmTvvIjlsI/ku7bmlbjkv53orYnmnIDnnIHv
-vIkKICBmdW5jdGlvbiBwYWNrUGllY2VzRXhhY3QocGllY2VzLCBzdG9ja1NpemVzKXsKICAgIGNvbnN0IHBzID0gcGllY2VzLnNsaWNlKCkuc29ydCgoYSxi
-KT0+Yi1hKTsKICAgIGlmKHBzLmxlbmd0aCA9PT0gMCkgcmV0dXJuIGZpbmFsaXplQmFycyhbXSk7CgogICAgY29uc3QgbWF4U3RvY2sgPSBNYXRoLm1heCgu
-Li5zdG9ja1NpemVzKTsKICAgIGlmKHBzWzBdID4gbWF4U3RvY2spIHJldHVybiB7IG9rOmZhbHNlLCByZWFzb246YOmcgOaxguautemVtyAke3BzWzBdfW1t
-IOi2hemBjuWPr+eUqOajkuadkOacgOWkp+mVt+W6pmAgfTsKCiAgICBsZXQgYmVzdEJhcnMgPSBudWxsOwogICAgbGV0IGJlc3RTY29yZUFyciA9IG51bGw7
-CgogICAgY29uc3QgYmFycyA9IFtdOyAvLyB7c2l6ZSwgcmVtYWluLCBjdXRzfQoKICAgIGZ1bmN0aW9uIGRmcyhpKXsKICAgICAgaWYoaSA9PT0gcHMubGVu
-Z3RoKXsKICAgICAgICBjb25zdCBwbGFuID0gZmluYWxpemVCYXJzKGJhcnMubWFwKGI9Pih7c2l6ZTpiLnNpemUsIHJlbWFpbjpiLnJlbWFpbiwgY3V0czpi
-LmN1dHMuc2xpY2UoKX0pKSk7CiAgICAgICAgY29uc3Qgc2MgPSBzY29yZVBsYW4ocGxhbik7CiAgICAgICAgaWYoIWJlc3RCYXJzIHx8IGJldHRlclNjb3Jl
-KHNjLCBiZXN0U2NvcmVBcnIpKXsKICAgICAgICAgIGJlc3RCYXJzID0gcGxhbi5iYXJzOwogICAgICAgICAgYmVzdFNjb3JlQXJyID0gc2M7CiAgICAgICAg
-fQogICAgICAgIHJldHVybjsKICAgICAgfQoKICAgICAgY29uc3QgcCA9IHBzW2ldOwoKICAgICAgLy8g5pSv5pW45Ymq5p6d77yI5L+d5a6I77yJCiAgICAg
-IGlmKGJlc3RCYXJzICYmIGJhcnMubGVuZ3RoID4gYmVzdEJhcnMubGVuZ3RoICsgMSkgcmV0dXJuOwoKICAgICAgLy8g5YWI5ZiX6Kmm5pS+5Yiw54++5pyJ
-5qOS5p2Q77yacmVtYWluIOi2iuWwj+i2iuWFiOippu+8iOi2iuiyvOWQiOi2iuWlve+8iQogICAgICBjb25zdCBpZHhzID0gYmFycy5tYXAoKGIsaWR4KT0+
-KHtpZHgsIHJlbWFpbjpiLnJlbWFpbn0pKS5zb3J0KChhLGIpPT5hLnJlbWFpbi1iLnJlbWFpbikubWFwKHg9PnguaWR4KTsKICAgICAgY29uc3Qgc2VlbiA9
-IG5ldyBTZXQoKTsKCiAgICAgIGZvcihjb25zdCBiaSBvZiBpZHhzKXsKICAgICAgICBjb25zdCBiID0gYmFyc1tiaV07CiAgICAgICAgaWYoYi5yZW1haW4g
-PCBwKSBjb250aW51ZTsKCiAgICAgICAgY29uc3QgayA9IGAke2Iuc2l6ZX18JHtiLnJlbWFpbn1gOwogICAgICAgIGlmKHNlZW4uaGFzKGspKSBjb250aW51
-ZTsgLy8g5bCN56ix5Ymq5p6dCiAgICAgICAgc2Vlbi5hZGQoayk7CgogICAgICAgIGIuY3V0cy5wdXNoKHApOwogICAgICAgIGIucmVtYWluIC09IHA7CiAg
-ICAgICAgZGZzKGkrMSk7CiAgICAgICAgYi5yZW1haW4gKz0gcDsKICAgICAgICBiLmN1dHMucG9wKCk7CgogICAgICAgIGlmKGIucmVtYWluID09PSAwKSBy
-ZXR1cm47IC8vIOWujOe+juiyvOWQiO+8jOipsuWxpOS4jeW/heWGjeippuWFtuS7lgogICAgICB9CgogICAgICAvLyDplovmlrDmo5LmnZDvvJrlvp7lsI/l
-iLDlpKfvvIjlkIzlianmlpnmmYLlgY/nn63mo5LmnZDvvIkKICAgICAgZm9yKGNvbnN0IHMgb2Ygc3RvY2tTaXplcyl7CiAgICAgICAgaWYocyA8IHApIGNv
-bnRpbnVlOwoKICAgICAgICBiYXJzLnB1c2goeyBzaXplOnMsIHJlbWFpbjpzLXAsIGN1dHM6W3BdIH0pOwogICAgICAgIGlmKCFiZXN0QmFycyB8fCBiYXJz
-Lmxlbmd0aCA8PSBiZXN0QmFycy5sZW5ndGggKyAxKXsKICAgICAgICAgIGRmcyhpKzEpOwogICAgICAgIH0KICAgICAgICBiYXJzLnBvcCgpOwoKICAgICAg
-ICBpZihzID09PSBwKSBicmVhazsKICAgICAgfQogICAgfQoKICAgIGRmcygwKTsKICAgIGlmKCFiZXN0QmFycykgcmV0dXJuIHsgb2s6ZmFsc2UsIHJlYXNv
-bjoi54Sh5rOV55Sf5oiQ5YiH5Ymy5pa55qGIIiB9OwoKICAgIHJldHVybiBmaW5hbGl6ZUJhcnMoYmVzdEJhcnMubWFwKGI9Pih7c2l6ZTpiLnNpemUsIHJl
-bWFpbjpiLnJlbWFpbiwgY3V0czpiLmN1dHN9KSkpOwogIH0KCiAgLy8g5Li75YWl5Y+j77ya5Zau5LiAL+WFqeWFqS/lhajmt7fnlKjlj5bmnIDnnIHvvJvl
-sI/ku7bmlbjnlKjnsr7norrop6MKICBmdW5jdGlvbiBvcHRpbWl6ZUN1dChwaWVjZXMsIHN0b2NrU2l6ZXMpewogICAgY29uc3QgdW5pcVNpemVzID0gc3Rv
-Y2tTaXplcy5zbGljZSgpLnNvcnQoKGEsYik9PmEtYik7CiAgICBpZih1bmlxU2l6ZXMubGVuZ3RoID09PSAwKSByZXR1cm4geyBvazpmYWxzZSwgcmVhc29u
-OiLmnKrpgbjmk4fku7vkvZXmo5LmnZDplbfluqbvvIg5LzEwLzEybe+8iSIgfTsKCiAgICBjb25zdCBjYW5kaWRhdGVzID0gW107CiAgICBmb3IobGV0IGk9
-MDtpPHVuaXFTaXplcy5sZW5ndGg7aSsrKSBjYW5kaWRhdGVzLnB1c2goW3VuaXFTaXplc1tpXV0pOwogICAgZm9yKGxldCBpPTA7aTx1bmlxU2l6ZXMubGVu
-Z3RoO2krKyl7CiAgICAgIGZvcihsZXQgaj1pKzE7ajx1bmlxU2l6ZXMubGVuZ3RoO2orKykgY2FuZGlkYXRlcy5wdXNoKFt1bmlxU2l6ZXNbaV0sIHVuaXFT
-aXplc1tqXV0pOwogICAgfQogICAgaWYodW5pcVNpemVzLmxlbmd0aCA+PSAzKSBjYW5kaWRhdGVzLnB1c2godW5pcVNpemVzKTsKCiAgICBjb25zdCBFWEFD
-VF9MSU1JVCA9IDIyOwoKICAgIGxldCBiZXN0ID0gbnVsbDsKICAgIGxldCBiZXN0U2NvcmVBcnIgPSBudWxsOwoKICAgIGZvcihjb25zdCBjIG9mIGNhbmRp
-ZGF0ZXMpewogICAgICBjb25zdCBwbGFuID0gKHBpZWNlcy5sZW5ndGggPD0gRVhBQ1RfTElNSVQpCiAgICAgICAgPyBwYWNrUGllY2VzRXhhY3QocGllY2Vz
-LCBjKQogICAgICAgIDogcGFja1BpZWNlc0Jlc3RGaXQocGllY2VzLCBjKTsKCiAgICAgIGlmKCFwbGFuLm9rKSBjb250aW51ZTsKCiAgICAgIGNvbnN0IHNj
-ID0gc2NvcmVQbGFuKHBsYW4pOwogICAgICBpZighYmVzdCB8fCBiZXR0ZXJTY29yZShzYywgYmVzdFNjb3JlQXJyKSl7CiAgICAgICAgYmVzdCA9IHsgLi4u
-cGxhbiwgdXNlZFNpemVzOmMuc2xpY2UoKSB9OwogICAgICAgIGJlc3RTY29yZUFyciA9IHNjOwogICAgICB9CiAgICB9CgogICAgcmV0dXJuIGJlc3QgfHwg
-eyBvazpmYWxzZSwgcmVhc29uOiLnhKHms5XnlJ/miJDliIflibLmlrnmoYjvvIjoq4vnorroqo3mo5LmnZDplbfluqbmiJbovLjlhaXvvIkiIH07CiAgfQoK
-ICBmdW5jdGlvbiByZW5kZXJDdXRDYXJkKHRpdGxlLCBwaWVjZXMsIHBsYW4sIHVuaXQpewogICAgY29uc3QgbW1Ub1VuaXQgPSAobW0pPT4gdW5pdD09PSJt
-IiA/IChtbS8xMDAwKS50b0ZpeGVkKDQpIDogKG1tKS50b0ZpeGVkKDEpOwogICAgY29uc3QgdSA9IHVuaXQ7CgogICAgaWYoIXBsYW4ub2spewogICAgICBy
-ZXR1cm4gYAogICAgICAgIDxkaXYgY2xhc3M9InN1YmNhcmQiPgogICAgICAgICAgPGgzPiR7dGl0bGV9PC9oMz4KICAgICAgICAgIDxkaXYgY2xhc3M9Indh
-cm4iPuKaoO+4jyAke3BsYW4ucmVhc29ufTwvZGl2PgogICAgICAgIDwvZGl2PgogICAgICBgOwogICAgfQoKICAgIGNvbnN0IHdhc3RlUGN0ID0gcGxhbi50
-b3RhbFB1cmNoYXNlZCA+IDAgPyAocGxhbi50b3RhbFdhc3RlIC8gcGxhbi50b3RhbFB1cmNoYXNlZCAqIDEwMCkgOiAwOwogICAgY29uc3QgdXNlZFNpemVz
-VHh0ID0gcGxhbi51c2VkU2l6ZXMubWFwKHM9PiAocy8xMDAwKS50b0ZpeGVkKDApKyJtIikuam9pbigiICsgIik7CiAgICBjb25zdCBzaXplU3VtbWFyeSA9
-IE9iamVjdC5rZXlzKHBsYW4uY291bnRCeVNpemUpLnNvcnQoKGEsYik9PithLStiKS5tYXAoaz0+ewogICAgICByZXR1cm4gYCR7KCtrLzEwMDApLnRvRml4
-ZWQoMCl9bcOXJHtwbGFuLmNvdW50QnlTaXplW2tdfWA7CiAgICB9KS5qb2luKCLjgIEiKTsKCiAgICBjb25zdCB0b3BQYXR0ZXJucyA9IHBsYW4ucGF0dGVy
-bnMuc2xpY2UoMCwgMTIpLm1hcChwPT57CiAgICAgIGNvbnN0IGN1dHNUeHQgPSBwLmN1dHMubWFwKHg9Pm1tVG9Vbml0KHgpKyIgIit1KS5qb2luKCIgKyAi
-KTsKICAgICAgY29uc3Qgd1R4dCA9IG1tVG9Vbml0KHAud2FzdGUpKyIgIit1OwogICAgICByZXR1cm4gYDx0cj4KICAgICAgICA8dGQgY2xhc3M9Im1vbm8i
-PiR7cC5jb3VudH3mlK88L3RkPgogICAgICAgIDx0ZCBjbGFzcz0ibW9ubyI+JHsocC5zaXplLzEwMDApLnRvRml4ZWQoMCl9bTwvdGQ+CiAgICAgICAgPHRk
-IGNsYXNzPSJtb25vIj4ke2N1dHNUeHR9PC90ZD4KICAgICAgICA8dGQgY2xhc3M9Im1vbm8iPiR7d1R4dH08L3RkPgogICAgICA8L3RyPmA7CiAgICB9KS5q
-b2luKCIiKTsKCiAgICBjb25zdCBuZWVkVG90YWwgPSBwaWVjZXMucmVkdWNlKChhLGIpPT5hK2IsMCk7CiAgICByZXR1cm4gYAogICAgICA8ZGl2IGNsYXNz
-PSJzdWJjYXJkIj4KICAgICAgICA8aDM+JHt0aXRsZX08L2gzPgogICAgICAgIDxkaXYgY2xhc3M9InNtYWxsIj4KICAgICAgICAgIOaWueahiO+8iOWFgeio
-se+8miR7dXNlZFNpemVzVHh0fe+8ie+9nOS9v+eUqO+8miR7c2l6ZVN1bW1hcnl9PGJyLz4KICAgICAgICAgIOmcgOaxgue4vemVt++8mjxzcGFuIGNsYXNz
-PSJtb25vIj4ke21tVG9Vbml0KG5lZWRUb3RhbCl9ICR7dX08L3NwYW4+44CACiAgICAgICAgICDos7zmlpnnuL3plbfvvJo8c3BhbiBjbGFzcz0ibW9ubyI+
-JHttbVRvVW5pdChwbGFuLnRvdGFsUHVyY2hhc2VkKX0gJHt1fTwvc3Bhbj7jgIAKICAgICAgICAgIOW7ouaWme+8mjxzcGFuIGNsYXNzPSJtb25vIj4ke21t
-VG9Vbml0KHBsYW4udG90YWxXYXN0ZSl9ICR7dX08L3NwYW4+77yIPHNwYW4gY2xhc3M9Im1vbm8iPiR7d2FzdGVQY3QudG9GaXhlZCgyKX0lPC9zcGFuPu+8
-iQogICAgICAgIDwvZGl2PgoKICAgICAgICA8ZGl2IHN0eWxlPSJtYXJnaW4tdG9wOjEwcHgiPgogICAgICAgICAgPHRhYmxlPgogICAgICAgICAgICA8dGhl
-YWQ+CiAgICAgICAgICAgICAgPHRyPgogICAgICAgICAgICAgICAgPHRoPuaVuOmHjzwvdGg+CiAgICAgICAgICAgICAgICA8dGg+5qOS5p2QPC90aD4KICAg
-ICAgICAgICAgICAgIDx0aD7liIflibI8L3RoPgogICAgICAgICAgICAgICAgPHRoPumkmOaWmTwvdGg+CiAgICAgICAgICAgICAgPC90cj4KICAgICAgICAg
-ICAgPC90aGVhZD4KICAgICAgICAgICAgPHRib2R5PgogICAgICAgICAgICAgICR7dG9wUGF0dGVybnMgfHwgYDx0cj48dGQgY29sc3Bhbj0iNCI+4oCUPC90
-ZD48L3RyPmB9CiAgICAgICAgICAgIDwvdGJvZHk+CiAgICAgICAgICA8L3RhYmxlPgogICAgICAgICAgPGRpdiBjbGFzcz0ic21hbGwiIHN0eWxlPSJtYXJn
-aW4tdG9wOjZweDsiPu+8iOWPqumhr+ekuuWJjSAxMiDnqK7liIflibLlnovvvJvlkIzlnovmnIPlkIjkvbXoqIjmlbjvvIk8L2Rpdj4KICAgICAgICA8L2Rp
-dj4KICAgICAgPC9kaXY+CiAgICBgOwogIH0KCiAgZnVuY3Rpb24gYnVpbGRDdXR0aW5nKHJlcyl7CiAgICBjb25zdCBzdG9ja1NpemVzID0gZ2V0U3RvY2tT
-aXplc01NKCk7CiAgICBjb25zdCB1bml0ID0gcmVzLnVuaXQ7CgogICAgLy8g4pyFIOWIh+aQjeW/veeVpQogICAgY29uc3Qga2VyZiA9IDA7CgogICAgY29u
-c3QgYmVhbVF0eSA9IE1hdGgubWF4KDAsIE1hdGguZmxvb3IoKG51bSgkKCJiZWFtUXR5IikudmFsdWUpIHx8IDEpKSk7CiAgICBjb25zdCBjb2xNdWwgID0g
-TWF0aC5tYXgoMCwgTWF0aC5mbG9vcigobnVtKCQoImNvbFF0eU11bCIpLnZhbHVlKSB8fCAxKSkpOwoKICAgIGNvbnN0IGNvbFBpZWNlcyA9IHJlcy5jb2xz
-CiAgICAgIC5tYXAoYyA9PiBjLmNvbF9sZW5fbWF0ZXJpYWxfbW0gKyBrZXJmKQogICAgICAuZmxhdE1hcChsZW4gPT4gQXJyYXkoY29sTXVsKS5maWxsKGxl
-bikpOwoKICAgIGNvbnN0IGJlYW1QaWVjZXMgPSBBcnJheShiZWFtUXR5KS5maWxsKHJlcy5zbGFudF9vdXQgKyBrZXJmKTsKCiAgICBjb25zdCBvdXQgPSBb
-XTsKCiAgICBpZihyZXMuY29scy5sZW5ndGggPiAwICYmIGNvbFBpZWNlcy5sZW5ndGggPiAwKXsKICAgICAgY29uc3QgY29sUGxhbiA9IG9wdGltaXplQ3V0
-KGNvbFBpZWNlcywgc3RvY2tTaXplcyk7CiAgICAgIG91dC5wdXNoKHJlbmRlckN1dENhcmQoIuafseWtkOeul+aWmSIsIGNvbFBpZWNlcywgY29sUGxhbiwg
-dW5pdCkpOwogICAgfSBlbHNlIHsKICAgICAgb3V0LnB1c2goYDxkaXYgY2xhc3M9InN1YmNhcmQiPjxoMz7mn7HlrZDnrpfmlpk8L2gzPjxkaXYgY2xhc3M9
-InNtYWxsIj7lsJrmnKrmnInmn7Hpq5jos4fmlpnvvIjoq4vlhYjovLjlhaXvvInjgII8L2Rpdj48L2Rpdj5gKTsKICAgIH0KCiAgICBpZihpc0YocmVzLnNs
-YW50X291dCkgJiYgcmVzLnNsYW50X291dCA+IDAgJiYgYmVhbVF0eSA+IDApewogICAgICBjb25zdCBiZWFtUGxhbiA9IG9wdGltaXplQ3V0KGJlYW1QaWVj
-ZXMsIHN0b2NrU2l6ZXMpOwogICAgICBvdXQucHVzaChyZW5kZXJDdXRDYXJkKCLmlpzmooHnrpfmlpnvvIjljIXlpJbmlpzplbfvvIkiLCBiZWFtUGllY2Vz
-LCBiZWFtUGxhbiwgdW5pdCkpOwogICAgfSBlbHNlIHsKICAgICAgb3V0LnB1c2goYDxkaXYgY2xhc3M9InN1YmNhcmQiPjxoMz7mlpzmooHnrpfmlpnvvIjl
-jIXlpJbmlpzplbfvvIk8L2gzPjxkaXYgY2xhc3M9InNtYWxsIj7lsJrmnKrmnInmlpzmooHplbfluqbvvIjoq4vlhYjovLjlhaUgTCDoiIfmn7Hpq5jvvInj
-gII8L2Rpdj48L2Rpdj5gKTsKICAgIH0KCiAgICAkKCJjdXRIb3N0IikuaW5uZXJIVE1MID0gb3V0LmpvaW4oIiIpOwogIH0KCiAgZnVuY3Rpb24gcmVuZGVy
-KHJlcyl7CiAgICBpZihyZXMud2FybmluZ3MubGVuZ3RoKXsKICAgICAgJCgid2FybmluZyIpLnN0eWxlLmRpc3BsYXkgPSAiIjsKICAgICAgJCgid2Fybmlu
-ZyIpLnRleHRDb250ZW50ID0gIuKaoO+4jyAiICsgcmVzLndhcm5pbmdzLmpvaW4oIiAvICIpOwogICAgfSBlbHNlIHsKICAgICAgJCgid2FybmluZyIpLnN0
-eWxlLmRpc3BsYXkgPSAibm9uZSI7CiAgICAgICQoIndhcm5pbmciKS50ZXh0Q29udGVudCA9ICIiOwogICAgfQogICAgcmVuZGVyVGFibGUocmVzKTsKICAg
-ICQoInJlc3VsdEhvc3QiKS5pbm5lckhUTUwgPSBgPHNwYW4+5YyF5aSW5pac6ZW377yaPC9zcGFuPiR7Zm10TGVuKHJlcy5zbGFudF9vdXQsIHJlcy51bml0
-KX1gOwogICAgcmVuZGVyU1ZHKHJlcyk7CiAgICBidWlsZEN1dHRpbmcocmVzKTsKICB9CgogIGZ1bmN0aW9uIGRvd25sb2FkVGV4dChmaWxlbmFtZSwgY29u
-dGVudCwgbWltZSl7CiAgICBjb25zdCBibG9iID0gbmV3IEJsb2IoW2NvbnRlbnRdLCB7dHlwZTptaW1lIHx8ICJ0ZXh0L3BsYWluO2NoYXJzZXQ9dXRmLTgi
-fSk7CiAgICBjb25zdCB1cmwgPSBVUkwuY3JlYXRlT2JqZWN0VVJMKGJsb2IpOwogICAgY29uc3QgYSA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoImEiKTsK
-ICAgIGEuaHJlZiA9IHVybDsgYS5kb3dubG9hZCA9IGZpbGVuYW1lOyBhLmNsaWNrKCk7CiAgICBVUkwucmV2b2tlT2JqZWN0VVJMKHVybCk7CiAgfQogIGZ1
-bmN0aW9uIGV4cG9ydENTVihyZXMpewogICAgY29uc3QgdSA9IHJlcy51bml0OwogICAgY29uc3Qgcm93cyA9IFtbImluZGV4Iiwic3BhY2luZ18iK3UsImNv
-bHVtbl9sZW5ndGhfIit1LCJkaF9jb25uX21pbnVzX2NlbnRlcl8iK3VdXTsKICAgIHJlcy5jb2xzLmZvckVhY2goYz0+ewogICAgICBjb25zdCBkeCA9IGlz
-RihjLmR4X21tKSA/ICgodT09PSJtIikgPyBjLmR4X21tLzEwMDAgOiBjLmR4X21tKSA6ICIiOwogICAgICBjb25zdCBsZW49ICh1PT09Im0iKSA/IGMuY29s
-X2xlbl9tYXRlcmlhbF9tbS8xMDAwIDogYy5jb2xfbGVuX21hdGVyaWFsX21tOwogICAgICBjb25zdCBkaCA9ICh1PT09Im0iKSA/IGMuZGhfY29ubl9jZW50
-ZXJfbW0vMTAwMCA6IGMuZGhfY29ubl9jZW50ZXJfbW07CiAgICAgIHJvd3MucHVzaChbYy5pbmRleCwgZHgsIGxlbiwgZGhdKTsKICAgIH0pOwogICAgZG93
-bmxvYWRUZXh0KCJjb2x1bW5zLmNzdiIsIHJvd3MubWFwKHI9PnIuam9pbigiLCIpKS5qb2luKCJcbiIpLCAidGV4dC9jc3Y7Y2hhcnNldD11dGYtOCIpOwog
-IH0KICBmdW5jdGlvbiBleHBvcnRTVkcoKXsKICAgIGNvbnN0IHN2ZyA9ICQoImRyYXdpbmdTdmciKTsKICAgIGlmKCFzdmcpIHJldHVybjsKICAgIGNvbnN0
-IGNvbnRlbnQgPSBuZXcgWE1MU2VyaWFsaXplcigpLnNlcmlhbGl6ZVRvU3RyaW5nKHN2Zyk7CiAgICBkb3dubG9hZFRleHQoImRyYXdpbmcuc3ZnIiwgY29u
-dGVudCwgImltYWdlL3N2Zyt4bWw7Y2hhcnNldD11dGYtOCIpOwogIH0KICBmdW5jdGlvbiBleHBvcnRQTkcoKXsKICAgIGNvbnN0IHN2ZyA9ICQoImRyYXdp
-bmdTdmciKTsKICAgIGlmKCFzdmcpIHJldHVybjsKICAgIGNvbnN0IHN2Z1RleHQgPSBuZXcgWE1MU2VyaWFsaXplcigpLnNlcmlhbGl6ZVRvU3RyaW5nKHN2
-Zyk7CiAgICBjb25zdCBibG9iID0gbmV3IEJsb2IoW3N2Z1RleHRdLCB7dHlwZToiaW1hZ2Uvc3ZnK3htbDtjaGFyc2V0PXV0Zi04In0pOwogICAgY29uc3Qg
-dXJsID0gVVJMLmNyZWF0ZU9iamVjdFVSTChibG9iKTsKICAgIGNvbnN0IGltZyA9IG5ldyBJbWFnZSgpOwogICAgaW1nLm9ubG9hZCA9ICgpID0+IHsKICAg
-ICAgY29uc3Qgc2NhbGUgPSA0OwogICAgICBjb25zdCBjYW52YXMgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCJjYW52YXMiKTsKICAgICAgY2FudmFzLndp
-ZHRoID0gMjk3KjEwKnNjYWxlOwogICAgICBjYW52YXMuaGVpZ2h0PSAyMTAqMTAqc2NhbGU7CiAgICAgIGNvbnN0IGN0eCA9IGNhbnZhcy5nZXRDb250ZXh0
-KCIyZCIpOwogICAgICBjdHguZmlsbFN0eWxlPSJ3aGl0ZSI7IGN0eC5maWxsUmVjdCgwLDAsY2FudmFzLndpZHRoLGNhbnZhcy5oZWlnaHQpOwogICAgICBj
-dHguZHJhd0ltYWdlKGltZywwLDAsY2FudmFzLndpZHRoLGNhbnZhcy5oZWlnaHQpOwogICAgICBjYW52YXMudG9CbG9iKChwbmdCbG9iKT0+ewogICAgICAg
-IGNvbnN0IHBuZ1VybCA9IFVSTC5jcmVhdGVPYmplY3RVUkwocG5nQmxvYik7CiAgICAgICAgY29uc3QgYSA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoImEi
-KTsKICAgICAgICBhLmhyZWY9cG5nVXJsOyBhLmRvd25sb2FkPSJkcmF3aW5nLnBuZyI7IGEuY2xpY2soKTsKICAgICAgICBVUkwucmV2b2tlT2JqZWN0VVJM
-KHBuZ1VybCk7CiAgICAgICAgVVJMLnJldm9rZU9iamVjdFVSTCh1cmwpOwogICAgICB9LCAiaW1hZ2UvcG5nIik7CiAgICB9OwogICAgaW1nLm9uZXJyb3Ig
-PSAoKT0+eyBVUkwucmV2b2tlT2JqZWN0VVJMKHVybCk7IGFsZXJ0KCJQTkcg5Yyv5Ye65aSx5pWX77yM6KuL55SoIFNWRyDmiJbliJfljbDmiJAgUERG44CC
-Iik7IH07CiAgICBpbWcuc3JjID0gdXJsOwogIH0KCiAgZnVuY3Rpb24gcmVjYWxjKCl7CiAgICBsYXN0UmVzID0gY29tcHV0ZSgpOwogICAgcmVuZGVyKGxh
-c3RSZXMpOwogIH0KCiAgJCgibW9kZV9jb3VudCIpLmFkZEV2ZW50TGlzdGVuZXIoImNsaWNrIiwgKCk9PnNldE1vZGUoImNvdW50IikpOwogICQoIm1vZGVf
-aGVpZ2h0cyIpLmFkZEV2ZW50TGlzdGVuZXIoImNsaWNrIiwgKCk9PnNldE1vZGUoImhlaWdodHMiKSk7CgogIFsKICAgICJ1bml0IiwiTCIsIk4iLCJIbG93
-IiwiSGhpZ2giLCJIbGlzdCIsImhTcGVjIiwiYmVhbUgiLCJjb2xCIiwKICAgICJzdG9jazkiLCJzdG9jazEwIiwic3RvY2sxMiIsImJlYW1RdHkiLCJjb2xR
-dHlNdWwiCiAgXS5mb3JFYWNoKGlkPT57CiAgICBjb25zdCBlbCA9ICQoaWQpOwogICAgaWYoIWVsKSByZXR1cm47CiAgICBlbC5hZGRFdmVudExpc3RlbmVy
-KCJpbnB1dCIsIHJlY2FsYyk7CiAgICBlbC5hZGRFdmVudExpc3RlbmVyKCJjaGFuZ2UiLCByZWNhbGMpOwogIH0pOwoKICAkKCJoU3BlYyIpLmFkZEV2ZW50
-TGlzdGVuZXIoImNoYW5nZSIsICgpPT57CiAgICAkKCJjdXN0b21IQiIpLnN0eWxlLmRpc3BsYXkgPSAoJCgiaFNwZWMiKS52YWx1ZT09PSJDVVNUT00iKSA/
-ICIiIDogIm5vbmUiOwogICAgcmVjYWxjKCk7CiAgfSk7CgogICQoInJlY2FsYyIpLmFkZEV2ZW50TGlzdGVuZXIoImNsaWNrIiwgcmVjYWxjKTsKICAkKCJy
-ZXNldCIpLmFkZEV2ZW50TGlzdGVuZXIoImNsaWNrIiwgKCk9PnsKICAgICQoInVuaXQiKS52YWx1ZT0ibW0iOwogICAgJCgiTCIpLnZhbHVlPSIiOwogICAg
-JCgiaFNwZWMiKS52YWx1ZT0iSDEwMCI7CiAgICAkKCJjdXN0b21IQiIpLnN0eWxlLmRpc3BsYXk9Im5vbmUiOwogICAgJCgiYmVhbUgiKS52YWx1ZT0iIjsK
-ICAgICQoImNvbEIiKS52YWx1ZT0iIjsKICAgICQoIk4iKS52YWx1ZT0iIjsKICAgICQoIkhsb3ciKS52YWx1ZT0iIjsKICAgICQoIkhoaWdoIikudmFsdWU9
-IiI7CiAgICAkKCJIbGlzdCIpLnZhbHVlPSIiOwogICAgJCgic3RvY2s5IikuY2hlY2tlZD10cnVlOwogICAgJCgic3RvY2sxMCIpLmNoZWNrZWQ9dHJ1ZTsK
-ICAgICQoInN0b2NrMTIiKS5jaGVja2VkPXRydWU7CiAgICAkKCJiZWFtUXR5IikudmFsdWU9IiI7CiAgICAkKCJjb2xRdHlNdWwiKS52YWx1ZT0iIjsKICAg
-IHNldE1vZGUoImNvdW50Iik7CiAgICByZWNhbGMoKTsKICB9KTsKCiAgJCgiYnRuX3ByaW50IikuYWRkRXZlbnRMaXN0ZW5lcigiY2xpY2siLCAoKT0+d2lu
-ZG93LnByaW50KCkpOwogICQoImJ0bl9zdmciKS5hZGRFdmVudExpc3RlbmVyKCJjbGljayIsIGV4cG9ydFNWRyk7CiAgJCgiYnRuX3BuZyIpLmFkZEV2ZW50
-TGlzdGVuZXIoImNsaWNrIiwgZXhwb3J0UE5HKTsKICAkKCJidG5fY3N2IikuYWRkRXZlbnRMaXN0ZW5lcigiY2xpY2siLCAoKT0+ZXhwb3J0Q1NWKGxhc3RS
-ZXMpKTsKCiAgcmVjYWxjKCk7Cn0pKCk7Cjwvc2NyaXB0Pgo8L2JvZHk+CjwvaHRtbD4K
-  </script>
-  <script type="text/plain" id="b64_window">
-PCFkb2N0eXBlIGh0bWw+CjxodG1sIGxhbmc9InpoLUhhbnQiPgo8aGVhZD4KPG1ldGEgY2hhcnNldD0idXRmLTgiPgo8bWV0YSBuYW1lPSJ2aWV3cG9ydCIg
-Y29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLGluaXRpYWwtc2NhbGU9MSIgLz4KPHRpdGxlPumQteeql+WIhuagvO+8iOebruaome+8nemWk+i3ne+8iTwv
-dGl0bGU+CjxzdHlsZT4KICBib2R5e21hcmdpbjowO2ZvbnQtZmFtaWx5OnN5c3RlbS11aSxBcmlhbDt9CgogIC8qIOmgkOiore+8muahjOapn+W3puWPs+aO
-kuWIlyAqLwogIC53cmFwewogICAgZGlzcGxheTpncmlkOwogICAgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOjQyMHB4IDFmcjsKICAgIGhlaWdodDoxMDB2aDsK
-ICB9CgogIC5wYW5lbHsKICAgIGJvcmRlci1yaWdodDoxcHggc29saWQgI2NjYzsKICAgIHBhZGRpbmc6MTZweDsKICAgIG92ZXJmbG93OmF1dG87CiAgfQoK
-ICBoMXtmb250LXNpemU6MThweDttYXJnaW46MCAwIDEycHh9CiAgbGFiZWx7Zm9udC1zaXplOjEzcHg7Y29sb3I6IzU1NTtkaXNwbGF5OmJsb2NrO21hcmdp
-bi1ib3R0b206NnB4fQogIGlucHV0e3dpZHRoOjEwMCU7cGFkZGluZzo4cHggMTBweDtmb250LXNpemU6MTRweDtib3JkZXI6MXB4IHNvbGlkICNjY2M7Ym9y
-ZGVyLXJhZGl1czo4cHg7Ym94LXNpemluZzpib3JkZXItYm94fQogIC5ncmlkMntkaXNwbGF5OmdyaWQ7Z3JpZC10ZW1wbGF0ZS1jb2x1bW5zOjFmciAxZnI7
-Z2FwOjEwcHh9CiAgLmJveHtib3JkZXI6MXB4IHNvbGlkICNjY2M7Ym9yZGVyLXJhZGl1czoxMHB4O3BhZGRpbmc6MTBweDttYXJnaW4tdG9wOjEwcHg7YmFj
-a2dyb3VuZDojZmFmYWZhfQogIC5ib3ggYntmb250LXNpemU6MTNweH0KICAubGluZXtmb250LXNpemU6MTNweDttYXJnaW46NHB4IDB9CgogIC5jYW52YXN7
-cGFkZGluZzoxNnB4O30KICAuc3RhZ2V7CiAgICBoZWlnaHQ6Y2FsYygxMDB2aCAtIDMycHgpOwogICAgYm9yZGVyOjFweCBzb2xpZCAjZGRkOwogICAgYm9y
-ZGVyLXJhZGl1czoxNnB4OwogICAgb3ZlcmZsb3c6aGlkZGVuOwogICAgYmFja2dyb3VuZDojZmZmOwogIH0KICBzdmd7d2lkdGg6MTAwJTtoZWlnaHQ6MTAw
-JTtkaXNwbGF5OmJsb2NrfQoKICAvKiDinIUg5omL5qmf77ya5pS55oiQ5LiK5LiL5o6S5YiX77yM5ZyW5pS+5LiL5pa5ICovCiAgQG1lZGlhIChtYXgtd2lk
-dGg6IDgyMHB4KXsKICAgIC53cmFwewogICAgICBncmlkLXRlbXBsYXRlLWNvbHVtbnM6MWZyOwogICAgICBncmlkLXRlbXBsYXRlLXJvd3M6YXV0byAxZnI7
-CiAgICAgIGhlaWdodDphdXRvOyAgICAgICAgICAvKiDkuI3pjpbmrbsgMTAwdmjvvIzpgb/lhY3miYvmqZ/ngI/opr3lmajliJflubLmk74gKi8KICAgICAg
-bWluLWhlaWdodDoxMDB2aDsKICAgIH0KICAgIC5wYW5lbHsKICAgICAgYm9yZGVyLXJpZ2h0Om5vbmU7CiAgICAgIGJvcmRlci1ib3R0b206MXB4IHNvbGlk
-ICNjY2M7CiAgICAgIG92ZXJmbG93OnZpc2libGU7CiAgICB9CiAgICAuY2FudmFze3BhZGRpbmc6MTJweCAxNnB4IDE2cHg7fQogICAgLnN0YWdlewogICAg
-ICBoZWlnaHQ6NjB2aDsgICAgICAgICAgLyog5omL5qmf57Wm5ZyW5LiA5YCL5Y+v55yL6auY5bqmICovCiAgICAgIG1pbi1oZWlnaHQ6NDIwcHg7ICAgICAv
-KiDpgb/lhY3lpKrnn64gKi8KICAgIH0KICB9CgogIC8qIOabtOWwj+aJi+apn+WGjee4ruS4gOm7nui8uOWFpemWk+i3nSAqLwogIEBtZWRpYSAobWF4LXdp
-ZHRoOiA0MjBweCl7CiAgICAucGFuZWx7cGFkZGluZzoxMnB4O30KICAgIC5jYW52YXN7cGFkZGluZzoxMHB4IDEycHggMTJweDt9CiAgICAuc3RhZ2V7aGVp
-Z2h0OjU4dmg7IG1pbi1oZWlnaHQ6MzgwcHg7fQogIH0KPC9zdHlsZT4KPC9oZWFkPgo8Ym9keT4KCjxkaXYgY2xhc3M9IndyYXAiPgogIDxkaXYgY2xhc3M9
-InBhbmVsIj4KICAgIDxoMT7pkLXnqpfliIbmoLzvvIjnm67mqJnvvJ3plpPot53vvIk8L2gxPgoKICAgIDxkaXYgY2xhc3M9ImdyaWQyIj4KICAgICAgPGRp
-diBjbGFzcz0icm93Ij4KICAgICAgICA8bGFiZWw+57i95a+sIFfvvIhtbe+8iTwvbGFiZWw+CiAgICAgICAgPGlucHV0IGlkPSJXIiB0eXBlPSJudW1iZXIi
-IHZhbHVlPSIzMDAwIj4KICAgICAgPC9kaXY+CiAgICAgIDxkaXYgY2xhc3M9InJvdyI+CiAgICAgICAgPGxhYmVsPue4vemrmCBI77yIbW3vvIk8L2xhYmVs
-PgogICAgICAgIDxpbnB1dCBpZD0iSCIgdHlwZT0ibnVtYmVyIiB2YWx1ZT0iMTIwMCI+CiAgICAgIDwvZGl2PgogICAgPC9kaXY+CgogICAgPGRpdiBjbGFz
-cz0iZ3JpZDIiIHN0eWxlPSJtYXJnaW4tdG9wOjEwcHg7Ij4KICAgICAgPGRpdiBjbGFzcz0icm93Ij4KICAgICAgICA8bGFiZWw+5aSW5qGGIEHvvIhtbe+8
-iTwvbGFiZWw+CiAgICAgICAgPGlucHV0IGlkPSJBIiB0eXBlPSJudW1iZXIiIHZhbHVlPSI1MCI+CiAgICAgIDwvZGl2PgogICAgICA8ZGl2IGNsYXNzPSJy
-b3ciPgogICAgICAgIDxsYWJlbD7lhafpkLUgQu+8iG1t77yJPC9sYWJlbD4KICAgICAgICA8aW5wdXQgaWQ9IkIiIHR5cGU9Im51bWJlciIgdmFsdWU9IjI1
-Ij4KICAgICAgPC9kaXY+CiAgICA8L2Rpdj4KCiAgICA8ZGl2IGNsYXNzPSJyb3ciIHN0eWxlPSJtYXJnaW4tdG9wOjEwcHg7Ij4KICAgICAgPGxhYmVsPueb
-ruaomemWk+i3ne+8iG1t77yJPC9sYWJlbD4KICAgICAgPGlucHV0IGlkPSJHdCIgdHlwZT0ibnVtYmVyIiB2YWx1ZT0iMTQwIj4KICAgIDwvZGl2PgoKICAg
-IDxkaXYgY2xhc3M9ImJveCI+CiAgICAgIDxiPui/keS8vOmFjee9rjwvYj4KICAgICAgPGRpdiBjbGFzcz0ibGluZSI+5pu05bCR77yaTj08c3BhbiBpZD0i
-bkxlc3MiPi08L3NwYW4+77yM6ZaT6LedPTxzcGFuIGlkPSJnTGVzcyI+LTwvc3Bhbj4gbW08L2Rpdj4KICAgICAgPGRpdiBjbGFzcz0ibGluZSI+5pu05aSa
-77yaTj08c3BhbiBpZD0ibk1vcmUiPi08L3NwYW4+77yM6ZaT6LedPTxzcGFuIGlkPSJnTW9yZSI+LTwvc3Bhbj4gbW08L2Rpdj4KICAgIDwvZGl2PgoKICAg
-IDxkaXYgY2xhc3M9ImJveCI+CiAgICAgIDxiPuaOoeeUqOmFjee9rjwvYj4KICAgICAgPGRpdiBjbGFzcz0ibGluZSI+5YWn6ZC15pSv5pW477yaPHNwYW4g
-aWQ9Ik4iPi08L3NwYW4+PC9kaXY+CiAgICAgIDxkaXYgY2xhc3M9ImxpbmUiPuWvpumam+mWk+i3ne+8mjxzcGFuIGlkPSJnYXAiPi08L3NwYW4+IG1tPC9k
-aXY+CiAgICA8L2Rpdj4KCiAgICA8ZGl2IGNsYXNzPSJib3giPgogICAgICA8Yj7pkLXmlpnkvLDnrpc8L2I+CiAgICAgIDxkaXYgY2xhc3M9ImdyaWQyIiBz
-dHlsZT0ibWFyZ2luLXRvcDo4cHg7Ij4KICAgICAgICA8ZGl2IGNsYXNzPSJyb3ciPgogICAgICAgICAgPGxhYmVsPuWkluahhumQteaWmemVt+W6pu+8iG1t
-77yJPC9sYWJlbD4KICAgICAgICAgIDxpbnB1dCBpZD0ic3RpY2tBIiB0eXBlPSJudW1iZXIiIHZhbHVlPSI2MDAwIj4KICAgICAgICA8L2Rpdj4KICAgICAg
-ICA8ZGl2IGNsYXNzPSJyb3ciPgogICAgICAgICAgPGxhYmVsPuWFp+mQtemQteaWmemVt+W6pu+8iG1t77yJPC9sYWJlbD4KICAgICAgICAgIDxpbnB1dCBp
-ZD0ic3RpY2tCIiB0eXBlPSJudW1iZXIiIHZhbHVlPSI2MDAwIj4KICAgICAgICA8L2Rpdj4KICAgICAgPC9kaXY+CgogICAgICA8ZGl2IGNsYXNzPSJsaW5l
-IiBzdHlsZT0ibWFyZ2luLXRvcDo4cHg7Ij7lpJbmoYbnuL3plbfvvJo8c3BhbiBpZD0iZnJhbWVMZW4iPi08L3NwYW4+IG1tPC9kaXY+CiAgICAgIDxkaXYg
-Y2xhc3M9ImxpbmUiPuWkluahhumQteaWmemcgOaxgu+8mjxzcGFuIGlkPSJmcmFtZVN0aWNrIj4tPC9zcGFuPjwvZGl2PgoKICAgICAgPGRpdiBjbGFzcz0i
-bGluZSIgc3R5bGU9Im1hcmdpbi10b3A6OHB4OyI+5Zau5pSv5YWn6ZC16ZW377yaPHNwYW4gaWQ9ImJhckxlbiI+LTwvc3Bhbj4gbW08L2Rpdj4KICAgICAg
-PGRpdiBjbGFzcz0ibGluZSI+5YWn6ZC157i96ZW377yaPHNwYW4gaWQ9ImJhcnNMZW4iPi08L3NwYW4+IG1tPC9kaXY+CiAgICAgIDxkaXYgY2xhc3M9Imxp
-bmUiPuWFp+mQteadkOmcgOaxgu+8mjxzcGFuIGlkPSJiYXJzU3RpY2siPi08L3NwYW4+PC9kaXY+CiAgICA8L2Rpdj4KICA8L2Rpdj4KCiAgPGRpdiBjbGFz
-cz0iY2FudmFzIj4KICAgIDxkaXYgY2xhc3M9InN0YWdlIj4KICAgICAgPHN2ZyBpZD0ic3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmci
-IGFyaWEtbGFiZWw9Imlyb24gd2luZG93Ij4KICAgICAgICA8ZGVmcz48L2RlZnM+CiAgICAgICAgPGcgaWQ9ImciPjwvZz4KICAgICAgPC9zdmc+CiAgICA8
-L2Rpdj4KICA8L2Rpdj4KPC9kaXY+Cgo8c2NyaXB0Pgpjb25zdCAkPWlkPT5kb2N1bWVudC5nZXRFbGVtZW50QnlJZChpZCk7CmNvbnN0IHR4dD0oeCk9Pk51
-bWJlcih4KS50b0ZpeGVkKDIpOwoKZnVuY3Rpb24gc3RpY2tzKHRvdGFsLCBzdGljayl7CiAgaWYgKCEoc3RpY2sgPiAwKSkgcmV0dXJuICItIjsKICByZXR1
-cm4gTWF0aC5jZWlsKHRvdGFsIC8gc3RpY2spICsgIiDmlK8iOwp9CgpmdW5jdGlvbiBjb21wdXRlTk9wdGlvbnMoaW5uZXJXLCBCLCBnYXBUYXJnZXQpewog
-IGNvbnN0IG4wID0gKGlubmVyVyAtIGdhcFRhcmdldCkgLyAoQiArIGdhcFRhcmdldCk7CiAgbGV0IG5MZXNzID0gTWF0aC5mbG9vcihuMCk7CiAgbGV0IG5N
-b3JlID0gTWF0aC5jZWlsKG4wKTsKICBuTGVzcyA9IE1hdGgubWF4KDEsIG5MZXNzKTsKICBuTW9yZSA9IE1hdGgubWF4KDEsIG5Nb3JlKTsKCiAgY29uc3Qg
-Z2FwTGVzcyA9IChpbm5lclcgLSBuTGVzcyAqIEIpIC8gKG5MZXNzICsgMSk7CiAgY29uc3QgZ2FwTW9yZSA9IChpbm5lclcgLSBuTW9yZSAqIEIpIC8gKG5N
-b3JlICsgMSk7CgogIHJldHVybiB7IG5MZXNzLCBuTW9yZSwgZ2FwTGVzcywgZ2FwTW9yZSB9Owp9CgpmdW5jdGlvbiBjYWxjKCl7CiAgY29uc3QgVz0rJCgi
-VyIpLnZhbHVlOwogIGNvbnN0IEg9KyQoIkgiKS52YWx1ZTsKICBjb25zdCBBPSskKCJBIikudmFsdWU7CiAgY29uc3QgQj0rJCgiQiIpLnZhbHVlOwogIGNv
-bnN0IEc9KyQoIkd0IikudmFsdWU7CgogIGlmICghKFc+MCAmJiBIPjAgJiYgQT49MCAmJiBCPjAgJiYgRz4wKSkgcmV0dXJuOwogIGlmICgyKkEgPj0gVyB8
-fCAyKkEgPj0gSCkgcmV0dXJuOwoKICBjb25zdCBpbm5lclcgPSBXIC0gMipBOwogIGNvbnN0IHsgbkxlc3MsIG5Nb3JlLCBnYXBMZXNzLCBnYXBNb3JlIH0g
-PSBjb21wdXRlTk9wdGlvbnMoaW5uZXJXLCBCLCBHKTsKCiAgJCgibkxlc3MiKS50ZXh0Q29udGVudCA9IG5MZXNzOwogICQoImdMZXNzIikudGV4dENvbnRl
-bnQgPSB0eHQoZ2FwTGVzcyk7CiAgJCgibk1vcmUiKS50ZXh0Q29udGVudCA9IG5Nb3JlOwogICQoImdNb3JlIikudGV4dENvbnRlbnQgPSB0eHQoZ2FwTW9y
-ZSk7CgogIGNvbnN0IHVzZU4gPSAoTWF0aC5hYnMoZ2FwTGVzcyAtIEcpIDw9IE1hdGguYWJzKGdhcE1vcmUgLSBHKSkgPyBuTGVzcyA6IG5Nb3JlOwogIGNv
-bnN0IGdhcCA9IChpbm5lclcgLSB1c2VOKkIpIC8gKHVzZU4gKyAxKTsKCiAgJCgiTiIpLnRleHRDb250ZW50ID0gdXNlTjsKICAkKCJnYXAiKS50ZXh0Q29u
-dGVudCA9IHR4dChnYXApOwoKICBjb25zdCBmcmFtZUxlbiA9IDIqVyArIDIqSDsKICAkKCJmcmFtZUxlbiIpLnRleHRDb250ZW50ID0gTWF0aC5yb3VuZChm
-cmFtZUxlbik7CiAgJCgiZnJhbWVTdGljayIpLnRleHRDb250ZW50ID0gc3RpY2tzKGZyYW1lTGVuLCArJCgic3RpY2tBIikudmFsdWUpOwoKICBjb25zdCBi
-YXJMZW4gPSBIIC0gMipBOwogIGNvbnN0IGJhcnNMZW4gPSB1c2VOICogYmFyTGVuOwogICQoImJhckxlbiIpLnRleHRDb250ZW50ID0gTWF0aC5yb3VuZChi
-YXJMZW4pOwogICQoImJhcnNMZW4iKS50ZXh0Q29udGVudCA9IE1hdGgucm91bmQoYmFyc0xlbik7CiAgJCgiYmFyc1N0aWNrIikudGV4dENvbnRlbnQgPSBz
-dGlja3MoYmFyc0xlbiwgKyQoInN0aWNrQiIpLnZhbHVlKTsKCiAgZHJhdyhXLEgsQSxCLHVzZU4sZ2FwKTsKfQoKZnVuY3Rpb24gZHJhdyhXLEgsQSxCLE4s
-Z2FwKXsKICBjb25zdCBzdmcgPSAkKCJzdmciKTsKICBjb25zdCBnID0gJCgiZyIpOwogIGcuaW5uZXJIVE1MPSIiOwoKICBjb25zdCBwYWQgPSA2NTA7CiAg
-c3ZnLnNldEF0dHJpYnV0ZSgidmlld0JveCIsYCR7LXBhZH0gJHstcGFkfSAke1crcGFkKjJ9ICR7SCtwYWQqMn1gKTsKCiAgY29uc3Qgc2NhbGVXID0gKFcg
-KyBwYWQqMikgLyBXOwogIGNvbnN0IHNjYWxlSCA9IChIICsgcGFkKjIpIC8gSDsKICBjb25zdCBrID0gTWF0aC5tYXgoc2NhbGVXLCBzY2FsZUgpOwoKICBj
-b25zdCBkaW1Gb250ICAgPSBNYXRoLnJvdW5kKDI0ICogayk7CiAgY29uc3QgZGltU3Ryb2tlID0gMi42ICogazsKICBjb25zdCBleHRTdHJva2UgPSAxLjkg
-KiBrOwoKICBjb25zdCBhcnJvd1cgPSBNYXRoLnJvdW5kKDE4ICogayk7CiAgY29uc3QgYXJyb3dIID0gTWF0aC5yb3VuZCgxMiAqIGspOwogIGNvbnN0IGdh
-cFRvRXh0ID0gOCAqIGs7CiAgY29uc3QgdGV4dFBhZFggPSAxMCAqIGs7CiAgY29uc3QgdGV4dFBhZFkgPSA3ICogazsKCiAgc3ZnLnF1ZXJ5U2VsZWN0b3Io
-ImRlZnMiKS5pbm5lckhUTUwgPSBgCiAgICA8bWFya2VyIGlkPSJhcnJvd0VuZCIgbWFya2VyV2lkdGg9IiR7YXJyb3dXfSIgbWFya2VySGVpZ2h0PSIke2Fy
-cm93SH0iCiAgICAgICAgICAgIHJlZlg9IiR7YXJyb3dXfSIgcmVmWT0iJHthcnJvd0gvMn0iIG9yaWVudD0iYXV0byIgbWFya2VyVW5pdHM9InVzZXJTcGFj
-ZU9uVXNlIj4KICAgICAgPHBhdGggZD0iTTAsMCBMJHthcnJvd1d9LCR7YXJyb3dILzJ9IEwwLCR7YXJyb3dIfSBaIiBmaWxsPSIjMDAwIj48L3BhdGg+CiAg
-ICA8L21hcmtlcj4KICAgIDxtYXJrZXIgaWQ9ImFycm93U3RhcnQiIG1hcmtlcldpZHRoPSIke2Fycm93V30iIG1hcmtlckhlaWdodD0iJHthcnJvd0h9Igog
-ICAgICAgICAgICByZWZYPSIwIiByZWZZPSIke2Fycm93SC8yfSIgb3JpZW50PSJhdXRvIiBtYXJrZXJVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8
-cGF0aCBkPSJNJHthcnJvd1d9LDAgTDAsJHthcnJvd0gvMn0gTCR7YXJyb3dXfSwke2Fycm93SH0gWiIgZmlsbD0iIzAwMCI+PC9wYXRoPgogICAgPC9tYXJr
-ZXI+CiAgYDsKCiAgLy8g5aSW5qGGICsg5YWn5qGGCiAgZy5pbnNlcnRBZGphY2VudEhUTUwoImJlZm9yZWVuZCIsIGAKICAgIDxyZWN0IHg9IjAiIHk9IjAi
-IHdpZHRoPSIke1d9IiBoZWlnaHQ9IiR7SH0iIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iNiIvPgogICAgPHJlY3QgeD0iJHtB
-fSIgeT0iJHtBfSIgd2lkdGg9IiR7Vy0yKkF9IiBoZWlnaHQ9IiR7SC0yKkF9IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIi
-Lz4KICBgKTsKCiAgLy8g5YWn6ZC1CiAgY29uc3QgaW5uZXJIID0gSCAtIDIqQTsKICBmb3IobGV0IGk9MDtpPE47aSsrKXsKICAgIGNvbnN0IHggPSBBICsg
-Z2FwICsgaSooQitnYXApOwogICAgZy5pbnNlcnRBZGphY2VudEhUTUwoImJlZm9yZWVuZCIsIGAKICAgICAgPHJlY3QgeD0iJHt4fSIgeT0iJHtBfSIgd2lk
-dGg9IiR7Qn0iIGhlaWdodD0iJHtpbm5lckh9IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiLz4KICAgIGApOwogIH0KCiAg
-Y29uc3QgZXh0PSh4MSx5MSx4Mix5Mik9PiB7CiAgICBnLmluc2VydEFkamFjZW50SFRNTCgiYmVmb3JlZW5kIiwKICAgICAgYDxsaW5lIHgxPSIke3gxfSIg
-eTE9IiR7eTF9IiB4Mj0iJHt4Mn0iIHkyPSIke3kyfSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIke2V4dFN0cm9rZX0iLz5gCiAgICApOwogIH07
-CgogIGNvbnN0IGRpbT0oeDEseTEseDIseTIsdCx0eCx0eSk9PiB7CiAgICBsZXQgZHggPSB4MiAtIHgxLCBkeSA9IHkyIC0geTE7CiAgICBjb25zdCBsZW4g
-PSBNYXRoLmh5cG90KGR4LGR5KSB8fCAxOwogICAgY29uc3QgdXggPSBkeC9sZW4sIHV5ID0gZHkvbGVuOwoKICAgIGNvbnN0IHN4ID0geDEgKyB1eCpnYXBU
-b0V4dDsKICAgIGNvbnN0IHN5ID0geTEgKyB1eSpnYXBUb0V4dDsKICAgIGNvbnN0IGV4ID0geDIgLSB1eCpnYXBUb0V4dDsKICAgIGNvbnN0IGV5ID0geTIg
-LSB1eSpnYXBUb0V4dDsKCiAgICBnLmluc2VydEFkamFjZW50SFRNTCgiYmVmb3JlZW5kIiwKICAgICAgYDxsaW5lIHgxPSIke3N4fSIgeTE9IiR7c3l9IiB4
-Mj0iJHtleH0iIHkyPSIke2V5fSIKICAgICAgICBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IiR7ZGltU3Ryb2tlfSIKICAgICAgICBtYXJrZXItc3Rh
-cnQ9InVybCgjYXJyb3dTdGFydCkiIG1hcmtlci1lbmQ9InVybCgjYXJyb3dFbmQpIi8+YAogICAgKTsKCiAgICBjb25zdCBhcHByb3hXID0gdC5sZW5ndGgg
-KiAoZGltRm9udCAqIDAuNjIpICsgdGV4dFBhZFgqMjsKICAgIGNvbnN0IGFwcHJveEggPSBkaW1Gb250ICsgdGV4dFBhZFkqMjsKCiAgICBnLmluc2VydEFk
-amFjZW50SFRNTCgiYmVmb3JlZW5kIiwKICAgICAgYDxyZWN0IHg9IiR7dHggLSBhcHByb3hXLzJ9IiB5PSIke3R5IC0gYXBwcm94SC8yfSIKICAgICAgICB3
-aWR0aD0iJHthcHByb3hXfSIgaGVpZ2h0PSIke2FwcHJveEh9IgogICAgICAgIGZpbGw9IndoaXRlIiBzdHJva2U9Im5vbmUiIG9wYWNpdHk9IjAuOSIvPmAK
-ICAgICk7CgogICAgZy5pbnNlcnRBZGphY2VudEhUTUwoImJlZm9yZWVuZCIsCiAgICAgIGA8dGV4dCB4PSIke3R4fSIgeT0iJHt0eX0iIGZvbnQtc2l6ZT0i
-JHtkaW1Gb250fSIgZm9udC13ZWlnaHQ9IjcwMCIKICAgICAgICB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiBmaWxs
-PSIjMDAwIj4ke3R9PC90ZXh0PmAKICAgICk7CiAgfTsKCiAgY29uc3Qgb2ZmID0gMTQwICogazsKCiAgLy8gVwogIGV4dCgwLEgsMCxIK29mZik7CiAgZXh0
-KFcsSCxXLEgrb2ZmKTsKICBkaW0oMCxIK29mZixXLEgrb2ZmLGBXID0gJHtXfSBtbWAsVy8yLEgrb2ZmKzQwKmspOwoKICAvLyBICiAgZXh0KDAsMCwtb2Zm
-LDApOwogIGV4dCgwLEgsLW9mZixIKTsKICBkaW0oLW9mZiwwLC1vZmYsSCxgSCA9ICR7SH0gbW1gLC1vZmYsSC8yKTsKCiAgLy8g5aSW5qGGIEEKICBjb25z
-dCB5QUV4dCA9IC1vZmYqMC4zNTsKICBjb25zdCB5QURpbSA9IC1vZmYqMC4zNSAtIDM1Kms7CiAgZXh0KDAsMCwwLHlBRXh0KTsKICBleHQoQSwwLEEseUFF
-eHQpOwogIGRpbSgwLHlBRXh0LEEseUFFeHQsYEEgPSAke0F9IG1tYCxBLzIseUFEaW0pOwoKICAvLyBnYXDvvIjnrKzkuIDlsaTvvIkKICBjb25zdCB5R2Fw
-RXh0ID0gLW9mZiowLjg1OwogIGNvbnN0IHlHYXBEaW0gPSAtb2ZmKjAuODUgLSAzNSprOwogIGV4dChBLCBBLCBBLCB5R2FwRXh0KTsKICBleHQoQStnYXAs
-IEEsIEErZ2FwLCB5R2FwRXh0KTsKICBkaW0oQSwgeUdhcEV4dCwgQStnYXAsIHlHYXBFeHQsIGDplpPot50gPSAke3R4dChnYXApfSBtbWAsIEErZ2FwLzIs
-IHlHYXBEaW0pOwoKICAvLyBC77yI56ys5LqM5bGk77yM6YG/5YWN6LefIGdhcCDph43nlorvvIkKICBjb25zdCB5QkV4dCA9IC1vZmYqMS4zNTsKICBjb25z
-dCB5QkRpbSA9IC1vZmYqMS4zNSAtIDM1Kms7CiAgZXh0KEErZ2FwLCBBLCBBK2dhcCwgeUJFeHQpOwogIGV4dChBK2dhcCtCLCBBLCBBK2dhcCtCLCB5QkV4
-dCk7CiAgZGltKEErZ2FwLCB5QkV4dCwgQStnYXArQiwgeUJFeHQsIGBCID0gJHtCfSBtbWAsIEErZ2FwK0IvMiwgeUJEaW0pOwp9Cgpkb2N1bWVudC5xdWVy
-eVNlbGVjdG9yQWxsKCJpbnB1dCIpLmZvckVhY2goaT0+aS5hZGRFdmVudExpc3RlbmVyKCJpbnB1dCIsIGNhbGMpKTsKY2FsYygpOwo8L3NjcmlwdD4KPC9i
-b2R5Pgo8L2h0bWw+Cg==
-  </script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const num = (v) => Number(v);
+  const isF = (v) => Number.isFinite(v) && !Number.isNaN(v);
+  const rad2deg = (r) => r * 180 / Math.PI;
 
-  <script>
-    const $ = (id) => document.getElementById(id);
+  let mode = "count";
+  let lastRes = null;
+  const showDims = true;
 
-    const frames = {
-      hbeam: $("frame_hbeam"),
-      window: $("frame_window"),
+  function setMode(m){
+    mode = m;
+    $("mode_count").classList.toggle("active", m==="count");
+    $("mode_heights").classList.toggle("active", m==="heights");
+    $("panel_count").style.display   = (m==="count") ? "" : "none";
+    $("panel_heights").style.display = (m==="heights") ? "" : "none";
+    recalc();
+  }
+
+  function parseHeights(text){
+    return text.split(/[\s,]+/).map(s=>s.trim()).filter(Boolean).map(Number).filter(isF);
+  }
+
+  function getHB(){
+    const spec = $("hSpec").value;
+    if(spec === "H100") return { H: 100, B: 100, label: "H100×100" };
+    if(spec === "H200") return { H: 200, B: 200, label: "H200×200" };
+    const H = Math.max(1, num($("beamH").value) || 0);
+    const B = Math.max(1, num($("colB").value) || 0);
+    return { H, B, label: `H${H}×${B}` };
+  }
+
+  function fmtLen(mm, unit){
+    if(!isF(mm)) return "—";
+    return (unit==="m" ? (mm/1000).toFixed(4) : (mm).toFixed(1)) + " " + unit;
+  }
+
+  function buildPiecewise(points){
+    const pts = points.slice().sort((a,b)=>a.x-b.x);
+    const n = pts.length;
+    return function yAt(x){
+      if(n === 0) return NaN;
+      if(n === 1) return pts[0].y;
+
+      if(x <= pts[0].x){
+        const p0 = pts[0], p1 = pts[1];
+        const t = (x - p0.x) / (p1.x - p0.x);
+        return p0.y + (p1.y - p0.y) * t;
+      }
+      if(x >= pts[n-1].x){
+        const p0 = pts[n-2], p1 = pts[n-1];
+        const t = (x - p0.x) / (p1.x - p0.x);
+        return p0.y + (p1.y - p0.y) * t;
+      }
+      for(let i=0;i<n-1;i++){
+        const a = pts[i], b = pts[i+1];
+        if(x >= a.x && x <= b.x){
+          const t = (x - a.x) / (b.x - a.x);
+          return a.y + (b.y - a.y) * t;
+        }
+      }
+      return NaN;
     };
-    const tabs = {
-      hbeam: $("tab_hbeam"),
-      window: $("tab_window"),
-    };
+  }
 
-    function decodeB64ToUtf8(b64){
-      const bin = atob(b64);
-      const bytes = new Uint8Array(bin.length);
-      for (let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
-      return new TextDecoder("utf-8").decode(bytes);
+  function polylineLength(pts){
+    let sum = 0;
+    for(let i=0;i<pts.length-1;i++){
+      sum += Math.hypot(pts[i+1].x - pts[i].x, pts[i+1].y - pts[i].y);
     }
+    return sum;
+  }
 
-    function getDoc(key){
-      const el = $("b64_" + key);
-      const b64 = (el?.textContent || "").replace(/\s+/g, "");
-      return decodeB64ToUtf8(b64);
-    }
+  function compute(){
+    const unit = $("unit").value;
+    const mul  = (unit==="m") ? 1000 : 1;
 
-    function ensureLoaded(key){
-      const f = frames[key];
-      if (f.dataset.loaded) return;
-      f.srcdoc = getDoc(key);
-      f.dataset.loaded = "1";
-    }
+    const L_in = num($("L").value);
+    const L = L_in * mul;
 
-    function show(key){
-      ensureLoaded(key);
-      for (const k of Object.keys(frames)){
-        frames[k].style.display = (k === key) ? "block" : "none";
-        tabs[k].classList.toggle("active", k === key);
+    const hb = getHB();
+    const beamH = hb.H;
+    const colB  = hb.B;
+
+    const warnings = [];
+    if(!isF(L) || L <= 0) warnings.push("L 必須 > 0");
+
+    let points = [];
+
+    if(mode === "heights"){
+      const hs = parseHeights($("Hlist").value).map(v => v*mul);
+      if(hs.length < 2) warnings.push("自訂柱高至少 2 筆（含兩端）");
+      if(isF(L) && L>0 && hs.length >= 2){
+        const N = hs.length;
+        const seg = N - 1;
+        for(let i=0;i<N;i++){
+          points.push({ x:(L*i)/seg, y:hs[i] });
+        }
+      }
+    } else {
+      const Nraw = num($("N").value);
+      const N = Math.max(2, Math.floor(Nraw || 0));
+      if(!isF(Nraw) || Nraw < 2) warnings.push("N 必須 ≥ 2");
+
+      const Hlow = num($("Hlow").value) * mul;
+      const Hhigh = num($("Hhigh").value) * mul;
+      if(!isF(Hlow) || !isF(Hhigh)) warnings.push("低點柱高 / 高點柱高 需要填數值");
+
+      if(isF(L) && L>0 && isF(Hlow) && isF(Hhigh) && N>=2){
+        const seg = N - 1;
+        for(let i=0;i<N;i++){
+          points.push({ x:(L*i)/seg, y: Hlow + (Hhigh - Hlow) * (i/seg) });
+        }
       }
     }
 
-    tabs.hbeam.addEventListener("click", () => show("hbeam"));
-    tabs.window.addEventListener("click", () => show("window"));
+    const yAt = buildPiecewise(points);
 
-    show("hbeam");
-  </script>
+    const xOutL = -colB/2;
+    const xOutR = L + colB/2;
+    const yOutL = yAt(xOutL);
+    const yOutR = yAt(xOutR);
+    const L_out = xOutR - xOutL;
+
+    const pathPts = [{x:xOutL, y:yOutL}, ...points, {x:xOutR, y:yOutR}];
+    const slant_out = polylineLength(pathPts);
+
+    const slope = (yOutR - yOutL) / (xOutR - xOutL);
+    const slopePct = slope * 100;
+    const angleDeg = rad2deg(Math.atan2((yOutR - yOutL), (xOutR - xOutL)));
+
+    // ✅ 柱子算料長度：max(左接點, 右接點)
+    const cols = points.map((p,i)=>{
+      const dx = (i===0) ? NaN : (p.x - points[i-1].x);
+
+      const xL = p.x - colB/2;
+      const xR = p.x + colB/2;
+      const yL = yAt(xL);
+      const yR = yAt(xR);
+      const colMatLen = Math.max(yL, yR);
+
+      const isLast = (i === points.length - 1);
+      const xConn = p.x + (isLast ? -colB/2 : +colB/2);
+      const dhConnCenter = yAt(xConn) - p.y;
+
+      return {
+        index: i+1,
+        x_mm: p.x,
+        dx_mm: dx,
+        col_len_center_mm: p.y,
+        col_len_material_mm: colMatLen,
+        dh_conn_center_mm: dhConnCenter
+      };
+    });
+
+    return { unit, L, hb, beamH, colB, warnings,
+             xOutL, xOutR, yOutL, yOutR, L_out, slant_out,
+             slopePct, angleDeg, points, cols, yAt };
+  }
+
+  function renderTable(res){
+    const u = res.unit;
+    const rows = res.cols.map(c => `
+      <tr>
+        <td>${c.index}</td>
+        <td>${isF(c.dx_mm) ? fmtLen(c.dx_mm, u) : "—"}</td>
+        <td>${fmtLen(c.col_len_material_mm, u)}</td>
+        <td>${fmtLen(c.dh_conn_center_mm, u)}</td>
+      </tr>
+    `).join("");
+    $("tableHost").innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>柱序</th>
+            <th>柱距（中心-中心）</th>
+            <th>柱長度</th>
+            <th>接點-中心 高低差</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  function renderSVG(res){
+    const W=297, H=210, margin=10;
+    const drawX=margin, drawY=margin, drawW=W-margin*2, drawH=H-margin*2;
+    const titleH = 12, dimH = 34;
+    const geomX = drawX, geomY = drawY + titleH, geomW = drawW, geomH = drawH - titleH - dimH;
+
+    const colB=res.colB, beamH=res.beamH;
+
+    const xMin = res.xOutL, xMax = res.xOutR;
+    const yMaxTop = Math.max(res.yOutL, res.yOutR, ...res.points.map(p=>p.y)) + beamH;
+    const yMin = 0, yMax = Math.max(1, yMaxTop);
+
+    const sx = geomW / (xMax - xMin);
+    const sy = geomH / (yMax - yMin);
+    const s  = Math.min(sx, sy);
+
+    const usedW = (xMax - xMin) * s;
+    const usedH = (yMax - yMin) * s;
+    const xPad = (geomW - usedW)/2;
+    const yPad = (geomH - usedH)/2;
+
+    function X(x){ return geomX + xPad + (x - xMin) * s; }
+    function Y(y){ return geomY + yPad + usedH - (y - yMin) * s; }
+
+    const yBase = Y(0);
+    const dimBase = drawY + drawH - 6;
+    const dimY2   = dimBase - 2;
+    const dimY1   = dimBase - 12;
+    const segDimY = dimBase - 22;
+
+    const bottomPts = [{x:res.xOutL, y:res.yOutL}, ...res.points, {x:res.xOutR, y:res.yOutR}];
+    const topPts    = bottomPts.map(p => ({x:p.x, y:p.y + beamH}));
+    const bottomStr = bottomPts.map(p => `${X(p.x)},${Y(p.y)}`).join(" ");
+    const topStr    = topPts.slice().reverse().map(p => `${X(p.x)},${Y(p.y)}`).join(" ");
+    const beamPoly = `<polygon points="${bottomStr} ${topStr}" fill="none" stroke="#0f172a" stroke-width="1.0" stroke-linejoin="miter" />`;
+
+    const colsSvg = res.points.map((p)=>{
+      const left = p.x - colB/2, right= p.x + colB/2;
+      return `
+        <rect x="${X(left)}" y="${Y(p.y)}" width="${(right-left)*s}" height="${(p.y-0)*s}" fill="none" stroke="#0f172a" stroke-width="0.8"/>
+        <circle cx="${X(p.x)}" cy="${Y(p.y)}" r="1.0" fill="#0f172a"/>
+      `;
+    }).join("");
+
+    const lrSideMid = (showDims && res.points.length <= 12) ? res.points.map((p)=>{
+      const xL = p.x - colB/2, xR = p.x + colB/2;
+      const yL = res.yAt(xL), yR = res.yAt(xR);
+      const yMidL = yL/2, yMidR = yR/2;
+      const out = colB * 0.35;
+      const xTextL = xL - out, xTextR = xR + out;
+      return `
+        <line x1="${X(xL)}" y1="${Y(yL)}" x2="${X(xTextL)}" y2="${Y(yMidL)}" stroke="#0f172a" stroke-width="0.25"/>
+        <text x="${X(xTextL)-1}" y="${Y(yMidL)+1}" font-size="3.0" text-anchor="end" fill="#0f172a">左 ${fmtLen(yL, res.unit)}</text>
+
+        <line x1="${X(xR)}" y1="${Y(yR)}" x2="${X(xTextR)}" y2="${Y(yMidR)}" stroke="#0f172a" stroke-width="0.25"/>
+        <text x="${X(xTextR)+1}" y="${Y(yMidR)+1}" font-size="3.0" text-anchor="start" fill="#0f172a">右 ${fmtLen(yR, res.unit)}</text>
+      `;
+    }).join("") : "";
+
+    const p1s = {x: X(res.xOutL), y: Y(res.yOutL)};
+    const p2s = {x: X(res.xOutR), y: Y(res.yOutR)};
+    const dxs = p2s.x - p1s.x, dys = p2s.y - p1s.y;
+    const lens = Math.hypot(dxs, dys) || 1;
+    const snx = -dys/lens, sny = dxs/lens;
+    const off = 22;
+    const A = { d1:{x:p1s.x+snx*off, y:p1s.y+sny*off}, d2:{x:p2s.x+snx*off, y:p2s.y+sny*off} };
+    const B = { d1:{x:p1s.x-snx*off, y:p1s.y-sny*off}, d2:{x:p2s.x-snx*off, y:p2s.y-sny*off} };
+    const best = (((A.d1.y+A.d2.y)/2) < ((B.d1.y+B.d2.y)/2)) ? A : B;
+    const tx = (best.d1.x + best.d2.x)/2;
+    const ty = (best.d1.y + best.d2.y)/2 - 3;
+
+    const xH = res.xOutL + 0.20 * (res.xOutR - res.xOutL);
+    const yH = res.yAt(xH);
+    const Hx = X(xH), Hy1 = Y(yH), Hy2 = Y(yH + beamH);
+
+    const segDims = (showDims && res.points.length <= 14) ? res.points.slice(1).map((p,i)=>{
+      const prev = res.points[i];
+      const x1 = X(prev.x), x2 = X(p.x);
+      const label = fmtLen(p.x - prev.x, res.unit);
+      return `
+        <line x1="${x1}" y1="${segDimY}" x2="${x2}" y2="${segDimY}" stroke="#0f172a" stroke-width="0.45"
+          marker-start="url(#tick)" marker-end="url(#tick)"/>
+        <text x="${(x1+x2)/2}" y="${segDimY-2}" font-size="3.0" text-anchor="middle" fill="#0f172a">${label}</text>
+      `;
+    }).join("") : "";
+
+    const xOutL = X(res.xOutL), xOutR = X(res.xOutR);
+    const xC1 = X(0), xC2 = X(res.L);
+
+    const title = `${res.hb.label}　|　斜度 ${isF(res.slopePct)?res.slopePct.toFixed(3):"—"}% / ${isF(res.angleDeg)?res.angleDeg.toFixed(2):"—"}°`;
+
+    $("svgHost").innerHTML = `
+      <svg id="drawingSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="100%" height="auto">
+        <defs>
+          <marker id="tick" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,6 L6,0" stroke="#0f172a" stroke-width="1.0" fill="none"/>
+          </marker>
+        </defs>
+
+        <rect x="${margin}" y="${margin}" width="${W-margin*2}" height="${H-margin*2}" fill="none" stroke="#0f172a" stroke-width="0.6"/>
+        <rect x="${drawX}" y="${drawY}" width="${drawW}" height="${drawH}" fill="none" stroke="#0f172a" stroke-width="0.35"/>
+
+        <text x="${drawX}" y="${drawY+6}" font-size="3.6" fill="#0f172a">${title}</text>
+
+        ${colsSvg}
+        ${beamPoly}
+
+        ${segDims}
+
+        <line x1="${xOutL}" y1="${dimY1}" x2="${xOutR}" y2="${dimY1}" stroke="#0f172a" stroke-width="0.55"
+          marker-start="url(#tick)" marker-end="url(#tick)"/>
+        <line x1="${xOutL}" y1="${yBase}" x2="${xOutL}" y2="${dimY1-1}" stroke="#0f172a" stroke-width="0.3"/>
+        <line x1="${xOutR}" y1="${yBase}" x2="${xOutR}" y2="${dimY1-1}" stroke="#0f172a" stroke-width="0.3"/>
+        <text x="${(xOutL+xOutR)/2}" y="${dimY1+4}" font-size="3.4" text-anchor="middle" fill="#0f172a">
+          包外 = ${fmtLen(res.L_out, res.unit)}
+        </text>
+
+        <line x1="${xC1}" y1="${dimY2}" x2="${xC2}" y2="${dimY2}" stroke="#0f172a" stroke-width="0.55"
+          marker-start="url(#tick)" marker-end="url(#tick)"/>
+        <line x1="${xC1}" y1="${yBase}" x2="${xC1}" y2="${dimY2-1}" stroke="#0f172a" stroke-width="0.3"/>
+        <line x1="${xC2}" y1="${yBase}" x2="${xC2}" y2="${dimY2-1}" stroke="#0f172a" stroke-width="0.3"/>
+        <text x="${(xC1+xC2)/2}" y="${dimY2+4}" font-size="3.4" text-anchor="middle" fill="#0f172a">
+          柱心-柱心 = ${fmtLen(res.L, res.unit)}
+        </text>
+
+        <line x1="${p1s.x}" y1="${p1s.y}" x2="${best.d1.x}" y2="${best.d1.y}" stroke="#0f172a" stroke-width="0.3"/>
+        <line x1="${p2s.x}" y1="${p2s.y}" x2="${best.d2.x}" y2="${best.d2.y}" stroke="#0f172a" stroke-width="0.3"/>
+        <line x1="${best.d1.x}" y1="${best.d1.y}" x2="${best.d2.x}" y2="${best.d2.y}" stroke="#0f172a" stroke-width="0.55"
+          marker-start="url(#tick)" marker-end="url(#tick)"/>
+        <text x="${tx}" y="${ty}" font-size="3.4" text-anchor="middle" fill="#0f172a">
+          包外斜長 = ${fmtLen(res.slant_out, res.unit)}
+        </text>
+
+        <line x1="${Hx}" y1="${Hy1}" x2="${Hx}" y2="${Hy2}" stroke="#0f172a" stroke-width="0.55"
+          marker-start="url(#tick)" marker-end="url(#tick)"/>
+        <text x="${Hx+6}" y="${(Hy1+Hy2)/2+1}" font-size="3.4" text-anchor="start" fill="#0f172a">
+          H = ${beamH} mm
+        </text>
+
+        ${lrSideMid}
+      </svg>
+    `;
+  }
+
+  // ---------- 算料（最省：小件數精確解） ----------
+  function getStockSizesMM(){
+    const arr = [];
+    if($("stock9").checked) arr.push(9000);
+    if($("stock10").checked) arr.push(10000);
+    if($("stock12").checked) arr.push(12000);
+    return arr.sort((a,b)=>a-b);
+  }
+
+  function scorePlan(plan){ return [plan.totalWaste, plan.totalBars, plan.totalPurchased]; }
+  function betterScore(a,b){
+    for(let i=0;i<a.length;i++){
+      if(a[i] !== b[i]) return a[i] < b[i];
+    }
+    return false;
+  }
+
+  function finalizeBars(bars){
+    let totalWaste = 0;
+    let totalPurchased = 0;
+    const countBySize = {};
+    for(const b of bars){
+      b.waste = b.remain;
+      totalWaste += b.waste;
+      totalPurchased += b.size;
+      countBySize[b.size] = (countBySize[b.size]||0) + 1;
+    }
+
+    const patterns = new Map();
+    for(const b of bars){
+      const cutsSorted = b.cuts.slice().sort((a,b)=>b-a);
+      const key = `${b.size}|${cutsSorted.join("+")}|w${b.waste}`;
+      if(!patterns.has(key)){
+        patterns.set(key, { count:0, size:b.size, cuts:cutsSorted, waste:b.waste });
+      }
+      patterns.get(key).count += 1;
+    }
+
+    return {
+      ok:true,
+      bars,
+      patterns: Array.from(patterns.values()).sort((a,b)=>{
+        if(b.count !== a.count) return b.count - a.count;
+        return a.waste - b.waste;
+      }),
+      totalWaste,
+      totalPurchased,
+      totalBars: bars.length,
+      countBySize
+    };
+  }
+
+  // 啟發式：Best-Fit Decreasing
+  function packPiecesBestFit(pieces, stockSizes){
+    const ps = pieces.slice().sort((a,b)=>b-a);
+    const bars = [];
+
+    for(const p of ps){
+      let bestIdx = -1;
+      let bestRemainAfter = Infinity;
+
+      for(let i=0;i<bars.length;i++){
+        const b = bars[i];
+        if(b.remain >= p){
+          const ra = b.remain - p;
+          if(ra < bestRemainAfter){
+            bestRemainAfter = ra;
+            bestIdx = i;
+          }
+        }
+      }
+
+      if(bestIdx >= 0){
+        const b = bars[bestIdx];
+        b.cuts.push(p);
+        b.remain -= p;
+        continue;
+      }
+
+      let chosen = null;
+      for(const s of stockSizes){
+        if(s >= p){
+          const remainAfter = s - p;
+          if(!chosen || remainAfter < chosen.remainAfter || (remainAfter === chosen.remainAfter && s < chosen.size)){
+            chosen = { size:s, remainAfter };
+          }
+        }
+      }
+      if(!chosen) return { ok:false, reason:`需求段長 ${p}mm 超過可用棒材最大長度` };
+
+      bars.push({ size: chosen.size, remain: chosen.size - p, cuts:[p] });
+    }
+
+    return finalizeBars(bars);
+  }
+
+  // 精確解：Branch & Bound（小件數保證最省）
+  function packPiecesExact(pieces, stockSizes){
+    const ps = pieces.slice().sort((a,b)=>b-a);
+    if(ps.length === 0) return finalizeBars([]);
+
+    const maxStock = Math.max(...stockSizes);
+    if(ps[0] > maxStock) return { ok:false, reason:`需求段長 ${ps[0]}mm 超過可用棒材最大長度` };
+
+    let bestBars = null;
+    let bestScoreArr = null;
+
+    const bars = []; // {size, remain, cuts}
+
+    function dfs(i){
+      if(i === ps.length){
+        const plan = finalizeBars(bars.map(b=>({size:b.size, remain:b.remain, cuts:b.cuts.slice()})));
+        const sc = scorePlan(plan);
+        if(!bestBars || betterScore(sc, bestScoreArr)){
+          bestBars = plan.bars;
+          bestScoreArr = sc;
+        }
+        return;
+      }
+
+      const p = ps[i];
+
+      // 支數剪枝（保守）
+      if(bestBars && bars.length > bestBars.length + 1) return;
+
+      // 先嘗試放到現有棒材：remain 越小越先試（越貼合越好）
+      const idxs = bars.map((b,idx)=>({idx, remain:b.remain})).sort((a,b)=>a.remain-b.remain).map(x=>x.idx);
+      const seen = new Set();
+
+      for(const bi of idxs){
+        const b = bars[bi];
+        if(b.remain < p) continue;
+
+        const k = `${b.size}|${b.remain}`;
+        if(seen.has(k)) continue; // 對稱剪枝
+        seen.add(k);
+
+        b.cuts.push(p);
+        b.remain -= p;
+        dfs(i+1);
+        b.remain += p;
+        b.cuts.pop();
+
+        if(b.remain === 0) return; // 完美貼合，該層不必再試其他
+      }
+
+      // 開新棒材：從小到大（同剩料時偏短棒材）
+      for(const s of stockSizes){
+        if(s < p) continue;
+
+        bars.push({ size:s, remain:s-p, cuts:[p] });
+        if(!bestBars || bars.length <= bestBars.length + 1){
+          dfs(i+1);
+        }
+        bars.pop();
+
+        if(s === p) break;
+      }
+    }
+
+    dfs(0);
+    if(!bestBars) return { ok:false, reason:"無法生成切割方案" };
+
+    return finalizeBars(bestBars.map(b=>({size:b.size, remain:b.remain, cuts:b.cuts})));
+  }
+
+  // 主入口：單一/兩兩/全混用取最省；小件數用精確解
+  function optimizeCut(pieces, stockSizes){
+    const uniqSizes = stockSizes.slice().sort((a,b)=>a-b);
+    if(uniqSizes.length === 0) return { ok:false, reason:"未選擇任何棒材長度（9/10/12m）" };
+
+    const candidates = [];
+    for(let i=0;i<uniqSizes.length;i++) candidates.push([uniqSizes[i]]);
+    for(let i=0;i<uniqSizes.length;i++){
+      for(let j=i+1;j<uniqSizes.length;j++) candidates.push([uniqSizes[i], uniqSizes[j]]);
+    }
+    if(uniqSizes.length >= 3) candidates.push(uniqSizes);
+
+    const EXACT_LIMIT = 22;
+
+    let best = null;
+    let bestScoreArr = null;
+
+    for(const c of candidates){
+      const plan = (pieces.length <= EXACT_LIMIT)
+        ? packPiecesExact(pieces, c)
+        : packPiecesBestFit(pieces, c);
+
+      if(!plan.ok) continue;
+
+      const sc = scorePlan(plan);
+      if(!best || betterScore(sc, bestScoreArr)){
+        best = { ...plan, usedSizes:c.slice() };
+        bestScoreArr = sc;
+      }
+    }
+
+    return best || { ok:false, reason:"無法生成切割方案（請確認棒材長度或輸入）" };
+  }
+
+  function renderCutCard(title, pieces, plan, unit){
+    const mmToUnit = (mm)=> unit==="m" ? (mm/1000).toFixed(4) : (mm).toFixed(1);
+    const u = unit;
+
+    if(!plan.ok){
+      return `
+        <div class="subcard">
+          <h3>${title}</h3>
+          <div class="warn">⚠️ ${plan.reason}</div>
+        </div>
+      `;
+    }
+
+    const wastePct = plan.totalPurchased > 0 ? (plan.totalWaste / plan.totalPurchased * 100) : 0;
+    const usedSizesTxt = plan.usedSizes.map(s=> (s/1000).toFixed(0)+"m").join(" + ");
+    const sizeSummary = Object.keys(plan.countBySize).sort((a,b)=>+a-+b).map(k=>{
+      return `${(+k/1000).toFixed(0)}m×${plan.countBySize[k]}`;
+    }).join("、");
+
+    const topPatterns = plan.patterns.slice(0, 12).map(p=>{
+      const cutsTxt = p.cuts.map(x=>mmToUnit(x)+" "+u).join(" + ");
+      const wTxt = mmToUnit(p.waste)+" "+u;
+      return `<tr>
+        <td class="mono">${p.count}支</td>
+        <td class="mono">${(p.size/1000).toFixed(0)}m</td>
+        <td class="mono">${cutsTxt}</td>
+        <td class="mono">${wTxt}</td>
+      </tr>`;
+    }).join("");
+
+    const needTotal = pieces.reduce((a,b)=>a+b,0);
+    return `
+      <div class="subcard">
+        <h3>${title}</h3>
+        <div class="small">
+          方案（允許：${usedSizesTxt}）｜使用：${sizeSummary}<br/>
+          需求總長：<span class="mono">${mmToUnit(needTotal)} ${u}</span>　
+          購料總長：<span class="mono">${mmToUnit(plan.totalPurchased)} ${u}</span>　
+          廢料：<span class="mono">${mmToUnit(plan.totalWaste)} ${u}</span>（<span class="mono">${wastePct.toFixed(2)}%</span>）
+        </div>
+
+        <div style="margin-top:10px">
+          <table>
+            <thead>
+              <tr>
+                <th>數量</th>
+                <th>棒材</th>
+                <th>切割</th>
+                <th>餘料</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${topPatterns || `<tr><td colspan="4">—</td></tr>`}
+            </tbody>
+          </table>
+          <div class="small" style="margin-top:6px;">（只顯示前 12 種切割型；同型會合併計數）</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildCutting(res){
+    const stockSizes = getStockSizesMM();
+    const unit = res.unit;
+
+    // ✅ 切損忽略
+    const kerf = 0;
+
+    const beamQty = Math.max(0, Math.floor((num($("beamQty").value) || 1)));
+    const colMul  = Math.max(0, Math.floor((num($("colQtyMul").value) || 1)));
+
+    const colPieces = res.cols
+      .map(c => c.col_len_material_mm + kerf)
+      .flatMap(len => Array(colMul).fill(len));
+
+    const beamPieces = Array(beamQty).fill(res.slant_out + kerf);
+
+    const out = [];
+
+    if(res.cols.length > 0 && colPieces.length > 0){
+      const colPlan = optimizeCut(colPieces, stockSizes);
+      out.push(renderCutCard("柱子算料", colPieces, colPlan, unit));
+    } else {
+      out.push(`<div class="subcard"><h3>柱子算料</h3><div class="small">尚未有柱高資料（請先輸入）。</div></div>`);
+    }
+
+    if(isF(res.slant_out) && res.slant_out > 0 && beamQty > 0){
+      const beamPlan = optimizeCut(beamPieces, stockSizes);
+      out.push(renderCutCard("斜梁算料（包外斜長）", beamPieces, beamPlan, unit));
+    } else {
+      out.push(`<div class="subcard"><h3>斜梁算料（包外斜長）</h3><div class="small">尚未有斜梁長度（請先輸入 L 與柱高）。</div></div>`);
+    }
+
+    $("cutHost").innerHTML = out.join("");
+  }
+
+  function render(res){
+    if(res.warnings.length){
+      $("warning").style.display = "";
+      $("warning").textContent = "⚠️ " + res.warnings.join(" / ");
+    } else {
+      $("warning").style.display = "none";
+      $("warning").textContent = "";
+    }
+    renderTable(res);
+    $("resultHost").innerHTML = `<span>包外斜長：</span>${fmtLen(res.slant_out, res.unit)}`;
+    renderSVG(res);
+    buildCutting(res);
+  }
+
+  function downloadText(filename, content, mime){
+    const blob = new Blob([content], {type:mime || "text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
+  function exportCSV(res){
+    const u = res.unit;
+    const rows = [["index","spacing_"+u,"column_length_"+u,"dh_conn_minus_center_"+u]];
+    res.cols.forEach(c=>{
+      const dx = isF(c.dx_mm) ? ((u==="m") ? c.dx_mm/1000 : c.dx_mm) : "";
+      const len= (u==="m") ? c.col_len_material_mm/1000 : c.col_len_material_mm;
+      const dh = (u==="m") ? c.dh_conn_center_mm/1000 : c.dh_conn_center_mm;
+      rows.push([c.index, dx, len, dh]);
+    });
+    downloadText("columns.csv", rows.map(r=>r.join(",")).join("\n"), "text/csv;charset=utf-8");
+  }
+  function exportSVG(){
+    const svg = $("drawingSvg");
+    if(!svg) return;
+    const content = new XMLSerializer().serializeToString(svg);
+    downloadText("drawing.svg", content, "image/svg+xml;charset=utf-8");
+  }
+  function exportPNG(){
+    const svg = $("drawingSvg");
+    if(!svg) return;
+    const svgText = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([svgText], {type:"image/svg+xml;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      const scale = 4;
+      const canvas = document.createElement("canvas");
+      canvas.width = 297*10*scale;
+      canvas.height= 210*10*scale;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle="white"; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      canvas.toBlob((pngBlob)=>{
+        const pngUrl = URL.createObjectURL(pngBlob);
+        const a = document.createElement("a");
+        a.href=pngUrl; a.download="drawing.png"; a.click();
+        URL.revokeObjectURL(pngUrl);
+        URL.revokeObjectURL(url);
+      }, "image/png");
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); alert("PNG 匯出失敗，請用 SVG 或列印成 PDF。"); };
+    img.src = url;
+  }
+
+  function recalc(){
+    lastRes = compute();
+    render(lastRes);
+  }
+
+  $("mode_count").addEventListener("click", ()=>setMode("count"));
+  $("mode_heights").addEventListener("click", ()=>setMode("heights"));
+
+  [
+    "unit","L","N","Hlow","Hhigh","Hlist","hSpec","beamH","colB",
+    "stock9","stock10","stock12","beamQty","colQtyMul"
+  ].forEach(id=>{
+    const el = $(id);
+    if(!el) return;
+    el.addEventListener("input", recalc);
+    el.addEventListener("change", recalc);
+  });
+
+  $("hSpec").addEventListener("change", ()=>{
+    $("customHB").style.display = ($("hSpec").value==="CUSTOM") ? "" : "none";
+    recalc();
+  });
+
+  $("recalc").addEventListener("click", recalc);
+  $("reset").addEventListener("click", ()=>{
+    $("unit").value="mm";
+    $("L").value="";
+    $("hSpec").value="H100";
+    $("customHB").style.display="none";
+    $("beamH").value="";
+    $("colB").value="";
+    $("N").value="";
+    $("Hlow").value="";
+    $("Hhigh").value="";
+    $("Hlist").value="";
+    $("stock9").checked=true;
+    $("stock10").checked=true;
+    $("stock12").checked=true;
+    $("beamQty").value="";
+    $("colQtyMul").value="";
+    setMode("count");
+    recalc();
+  });
+
+  $("btn_print").addEventListener("click", ()=>window.print());
+  $("btn_svg").addEventListener("click", exportSVG);
+  $("btn_png").addEventListener("click", exportPNG);
+  $("btn_csv").addEventListener("click", ()=>exportCSV(lastRes));
+
+  recalc();
+})();
+</script>
+
+</section>
+
+<script>
+/* ---------- 頁籤切換（預設手機開鐵窗） ---------- */
+(() => {
+  const $ = (id)=>document.getElementById(id);
+  const tabWindow = $("tab_window");
+  const tabBeam   = $("tab_beam");
+  const appWindow = $("app_window");
+  const appBeam   = $("app_beam");
+
+  function isMobile(){ return window.matchMedia("(max-width: 980px)").matches; }
+
+  function setTab(name){
+    const onWindow = (name === "window");
+    tabWindow.classList.toggle("active", onWindow);
+    tabBeam.classList.toggle("active", !onWindow);
+    appWindow.classList.toggle("active", onWindow);
+    appBeam.classList.toggle("active", !onWindow);
+    try{ localStorage.setItem("toolbox_tab", name); }catch(e){}
+    // 捲到頂，避免切頁籤卡在中段
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+
+  tabWindow.addEventListener("click", ()=>setTab("window"));
+  tabBeam.addEventListener("click", ()=>setTab("beam"));
+
+  let saved = null;
+  try{ saved = localStorage.getItem("toolbox_tab"); }catch(e){}
+  if(saved !== "window" && saved !== "beam") saved = null;
+
+  // 手機預設鐵窗，桌機預設 H型鋼
+  setTab(saved || (isMobile() ? "window" : "beam"));
+})();
+</script>
+
+<script>
+
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const txt = (x)=>Number(x).toFixed(2);
+
+  const isMobile = () => window.matchMedia("(max-width: 980px)").matches;
+
+  function sticks(total, stick){
+    if (!(stick > 0)) return "—";
+    return Math.ceil(total / stick) + " 支";
+  }
+
+  function computeNOptions(innerW, B, gapTarget){
+    const n0 = (innerW - gapTarget) / (B + gapTarget);
+    let nLess = Math.max(1, Math.floor(n0));
+    let nMore = Math.max(1, Math.ceil(n0));
+
+    const gapLess = (innerW - nLess * B) / (nLess + 1);
+    const gapMore = (innerW - nMore * B) / (nMore + 1);
+    return { nLess, nMore, gapLess, gapMore };
+  }
+
+  function calc(){
+    const W=+($("iw_W").value);
+    const H=+($("iw_H").value);
+    const A=+($("iw_A").value);
+    const B=+($("iw_B").value);
+    const G=+($("iw_Gt").value);
+
+    if (!(W>0 && H>0 && A>=0 && B>0 && G>0)) return;
+    if (2*A >= W || 2*A >= H) return;
+
+    const innerW = W - 2*A;
+    const { nLess, nMore, gapLess, gapMore } = computeNOptions(innerW, B, G);
+
+    $("iw_nLess").textContent = nLess;
+    $("iw_gLess").textContent = txt(gapLess);
+    $("iw_nMore").textContent = nMore;
+    $("iw_gMore").textContent = txt(gapMore);
+
+    const useN = (Math.abs(gapLess - G) <= Math.abs(gapMore - G)) ? nLess : nMore;
+    const gap = (innerW - useN*B) / (useN + 1);
+
+    $("iw_N").textContent = useN;
+    $("iw_gap").textContent = txt(gap);
+
+    const frameLen = 2*W + 2*H;
+    $("iw_frameLen").textContent = Math.round(frameLen);
+    $("iw_frameStick").textContent = sticks(frameLen, +$("iw_stickA").value);
+
+    const barLen = H - 2*A;
+    const barsLen = useN * barLen;
+    $("iw_barLen").textContent = Math.round(barLen);
+    $("iw_barsLen").textContent = Math.round(barsLen);
+    $("iw_barsStick").textContent = sticks(barsLen, +$("iw_stickB").value);
+
+    draw(W,H,A,B,useN,gap);
+  }
+
+  function draw(W,H,A,B,N,gap){
+    const svg = $("iw_svg");
+    const g = $("iw_g");
+    g.innerHTML="";
+
+    const pad = isMobile() ? 260 : 650;
+    svg.setAttribute("viewBox",`${-pad} ${-pad} ${W+pad*2} ${H+pad*2}`);
+
+    const scaleW = (W + pad*2) / W;
+    const scaleH = (H + pad*2) / H;
+    const k = Math.max(scaleW, scaleH);
+
+    const dimFont   = Math.round(24 * k);
+    const dimStroke = 2.6 * k;
+    const extStroke = 1.9 * k;
+
+    const arrowW = Math.round(18 * k);
+    const arrowH = Math.round(12 * k);
+    const gapToExt = 8 * k;
+    const textPadX = 10 * k;
+    const textPadY = 7 * k;
+
+    svg.querySelector("defs").innerHTML = `
+      <marker id="iw_arrowEnd" markerWidth="${arrowW}" markerHeight="${arrowH}"
+              refX="${arrowW}" refY="${arrowH/2}" orient="auto" markerUnits="userSpaceOnUse">
+        <path d="M0,0 L${arrowW},${arrowH/2} L0,${arrowH} Z" fill="#000"></path>
+      </marker>
+      <marker id="iw_arrowStart" markerWidth="${arrowW}" markerHeight="${arrowH}"
+              refX="0" refY="${arrowH/2}" orient="auto" markerUnits="userSpaceOnUse">
+        <path d="M${arrowW},0 L0,${arrowH/2} L${arrowW},${arrowH} Z" fill="#000"></path>
+      </marker>
+    `;
+
+    g.insertAdjacentHTML("beforeend", `
+      <rect x="0" y="0" width="${W}" height="${H}" fill="none" stroke="black" stroke-width="6"/>
+      <rect x="${A}" y="${A}" width="${W-2*A}" height="${H-2*A}" fill="none" stroke="black" stroke-width="2"/>
+    `);
+
+    const innerH = H - 2*A;
+    for(let i=0;i<N;i++){
+      const x = A + gap + i*(B+gap);
+      g.insertAdjacentHTML("beforeend", `
+        <rect x="${x}" y="${A}" width="${B}" height="${innerH}" fill="none" stroke="black" stroke-width="2"/>
+      `);
+    }
+
+    const ext=(x1,y1,x2,y2)=> {
+      g.insertAdjacentHTML("beforeend",
+        `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="black" stroke-width="${extStroke}"/>`
+      );
+    };
+
+    const dim=(x1,y1,x2,y2,t,tx,ty)=> {
+      let dx = x2 - x1, dy = y2 - y1;
+      const len = Math.hypot(dx,dy) || 1;
+      const ux = dx/len, uy = dy/len;
+
+      const sx = x1 + ux*gapToExt;
+      const sy = y1 + uy*gapToExt;
+      const ex = x2 - ux*gapToExt;
+      const ey = y2 - uy*gapToExt;
+
+      g.insertAdjacentHTML("beforeend",
+        `<line x1="${sx}" y1="${sy}" x2="${ex}" y2="${ey}"
+          stroke="black" stroke-width="${dimStroke}"
+          marker-start="url(#iw_arrowStart)" marker-end="url(#iw_arrowEnd)"/>`
+      );
+
+      const approxW = t.length * (dimFont * 0.62) + textPadX*2;
+      const approxH = dimFont + textPadY*2;
+
+      g.insertAdjacentHTML("beforeend",
+        `<rect x="${tx - approxW/2}" y="${ty - approxH/2}"
+          width="${approxW}" height="${approxH}"
+          fill="white" stroke="none" opacity="0.9"/>`
+      );
+
+      g.insertAdjacentHTML("beforeend",
+        `<text x="${tx}" y="${ty}" font-size="${dimFont}" font-weight="700"
+          text-anchor="middle" dominant-baseline="middle" fill="#000">${t}</text>`
+      );
+    };
+
+    const off = 140 * k;
+
+    // W
+    ext(0,H,0,H+off);
+    ext(W,H,W,H+off);
+    dim(0,H+off,W,H+off,`W = ${W} mm`,W/2,H+off+40*k);
+
+    // H
+    ext(0,0,-off,0);
+    ext(0,H,-off,H);
+    dim(-off,0,-off,H,`H = ${H} mm`,-off,H/2);
+
+    // 外框 A
+    const yAExt = -off*0.35;
+    const yADim = yAExt - 35*k;
+    ext(0,0,0,yAExt);
+    ext(A,0,A,yAExt);
+    dim(0,yAExt,A,yAExt,`A = ${A} mm`,A/2,yADim);
+
+    // gap（第一層）
+    const yGapExt = -off*0.85;
+    const yGapDim = yGapExt - 35*k;
+    ext(A, A, A, yGapExt);
+    ext(A+gap, A, A+gap, yGapExt);
+    dim(A, yGapExt, A+gap, yGapExt, `間距 = ${txt(gap)} mm`, A+gap/2, yGapDim);
+
+    // B（第二層）
+    const yBExt = -off*1.35;
+    const yBDim = yBExt - 35*k;
+    ext(A+gap, A, A+gap, yBExt);
+    ext(A+gap+B, A, A+gap+B, yBExt);
+    dim(A+gap, yBExt, A+gap+B, yBExt, `B = ${B} mm`, A+gap+B/2, yBDim);
+  }
+
+  function setupCollapse(){
+    const btn = $("iw_toggleBtn");
+    const controls = $("iw_controls");
+
+    const sync = ()=>{
+      const collapsed = controls.classList.contains("collapsed");
+      btn.textContent = collapsed ? "展開輸入" : "收起輸入";
+      btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    };
+
+    btn.addEventListener("click", ()=>{
+      controls.classList.toggle("collapsed");
+      sync();
+      setTimeout(calc, 0);
+    });
+
+    window.addEventListener("resize", ()=>{ calc(); });
+    sync();
+  }
+
+  ["iw_W","iw_H","iw_A","iw_B","iw_Gt","iw_stickA","iw_stickB"].forEach(id=>{
+    $(id).addEventListener("input", calc);
+    $(id).addEventListener("change", calc);
+  });
+
+  setupCollapse();
+  calc();
+})();
+
+</script>
+
+<script>
+
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const num = (v) => Number(v);
+  const isF = (v) => Number.isFinite(v) && !Number.isNaN(v);
+  const rad2deg = (r) => r * 180 / Math.PI;
+
+  let mode = "count";
+  let lastRes = null;
+  const showDims = true;
+
+  function setMode(m){
+    mode = m;
+    $("mode_count").classList.toggle("active", m==="count");
+    $("mode_heights").classList.toggle("active", m==="heights");
+    $("panel_count").style.display   = (m==="count") ? "" : "none";
+    $("panel_heights").style.display = (m==="heights") ? "" : "none";
+    recalc();
+  }
+
+  function parseHeights(text){
+    return text.split(/[\s,]+/).map(s=>s.trim()).filter(Boolean).map(Number).filter(isF);
+  }
+
+  function getHB(){
+    const spec = $("hSpec").value;
+    if(spec === "H100") return { H: 100, B: 100, label: "H100×100" };
+    if(spec === "H200") return { H: 200, B: 200, label: "H200×200" };
+    const H = Math.max(1, num($("beamH").value) || 0);
+    const B = Math.max(1, num($("colB").value) || 0);
+    return { H, B, label: `H${H}×${B}` };
+  }
+
+  function fmtLen(mm, unit){
+    if(!isF(mm)) return "—";
+    return (unit==="m" ? (mm/1000).toFixed(4) : (mm).toFixed(1)) + " " + unit;
+  }
+
+  function buildPiecewise(points){
+    const pts = points.slice().sort((a,b)=>a.x-b.x);
+    const n = pts.length;
+    return function yAt(x){
+      if(n === 0) return NaN;
+      if(n === 1) return pts[0].y;
+
+      if(x <= pts[0].x){
+        const p0 = pts[0], p1 = pts[1];
+        const t = (x - p0.x) / (p1.x - p0.x);
+        return p0.y + (p1.y - p0.y) * t;
+      }
+      if(x >= pts[n-1].x){
+        const p0 = pts[n-2], p1 = pts[n-1];
+        const t = (x - p0.x) / (p1.x - p0.x);
+        return p0.y + (p1.y - p0.y) * t;
+      }
+      for(let i=0;i<n-1;i++){
+        const a = pts[i], b = pts[i+1];
+        if(x >= a.x && x <= b.x){
+          const t = (x - a.x) / (b.x - a.x);
+          return a.y + (b.y - a.y) * t;
+        }
+      }
+      return NaN;
+    };
+  }
+
+  function polylineLength(pts){
+    let sum = 0;
+    for(let i=0;i<pts.length-1;i++){
+      sum += Math.hypot(pts[i+1].x - pts[i].x, pts[i+1].y - pts[i].y);
+    }
+    return sum;
+  }
+
+  function compute(){
+    const unit = $("unit").value;
+    const mul  = (unit==="m") ? 1000 : 1;
+
+    const L_in = num($("L").value);
+    const L = L_in * mul;
+
+    const hb = getHB();
+    const beamH = hb.H;
+    const colB  = hb.B;
+
+    const warnings = [];
+    if(!isF(L) || L <= 0) warnings.push("L 必須 > 0");
+
+    let points = [];
+
+    if(mode === "heights"){
+      const hs = parseHeights($("Hlist").value).map(v => v*mul);
+      if(hs.length < 2) warnings.push("自訂柱高至少 2 筆（含兩端）");
+      if(isF(L) && L>0 && hs.length >= 2){
+        const N = hs.length;
+        const seg = N - 1;
+        for(let i=0;i<N;i++){
+          points.push({ x:(L*i)/seg, y:hs[i] });
+        }
+      }
+    } else {
+      const Nraw = num($("N").value);
+      const N = Math.max(2, Math.floor(Nraw || 0));
+      if(!isF(Nraw) || Nraw < 2) warnings.push("N 必須 ≥ 2");
+
+      const Hlow = num($("Hlow").value) * mul;
+      const Hhigh = num($("Hhigh").value) * mul;
+      if(!isF(Hlow) || !isF(Hhigh)) warnings.push("低點柱高 / 高點柱高 需要填數值");
+
+      if(isF(L) && L>0 && isF(Hlow) && isF(Hhigh) && N>=2){
+        const seg = N - 1;
+        for(let i=0;i<N;i++){
+          points.push({ x:(L*i)/seg, y: Hlow + (Hhigh - Hlow) * (i/seg) });
+        }
+      }
+    }
+
+    const yAt = buildPiecewise(points);
+
+    const xOutL = -colB/2;
+    const xOutR = L + colB/2;
+    const yOutL = yAt(xOutL);
+    const yOutR = yAt(xOutR);
+    const L_out = xOutR - xOutL;
+
+    const pathPts = [{x:xOutL, y:yOutL}, ...points, {x:xOutR, y:yOutR}];
+    const slant_out = polylineLength(pathPts);
+
+    const slope = (yOutR - yOutL) / (xOutR - xOutL);
+    const slopePct = slope * 100;
+    const angleDeg = rad2deg(Math.atan2((yOutR - yOutL), (xOutR - xOutL)));
+
+    // ✅ 柱子算料長度：max(左接點, 右接點)
+    const cols = points.map((p,i)=>{
+      const dx = (i===0) ? NaN : (p.x - points[i-1].x);
+
+      const xL = p.x - colB/2;
+      const xR = p.x + colB/2;
+      const yL = yAt(xL);
+      const yR = yAt(xR);
+      const colMatLen = Math.max(yL, yR);
+
+      const isLast = (i === points.length - 1);
+      const xConn = p.x + (isLast ? -colB/2 : +colB/2);
+      const dhConnCenter = yAt(xConn) - p.y;
+
+      return {
+        index: i+1,
+        x_mm: p.x,
+        dx_mm: dx,
+        col_len_center_mm: p.y,
+        col_len_material_mm: colMatLen,
+        dh_conn_center_mm: dhConnCenter
+      };
+    });
+
+    return { unit, L, hb, beamH, colB, warnings,
+             xOutL, xOutR, yOutL, yOutR, L_out, slant_out,
+             slopePct, angleDeg, points, cols, yAt };
+  }
+
+  function renderTable(res){
+    const u = res.unit;
+    const rows = res.cols.map(c => `
+      <tr>
+        <td>${c.index}</td>
+        <td>${isF(c.dx_mm) ? fmtLen(c.dx_mm, u) : "—"}</td>
+        <td>${fmtLen(c.col_len_material_mm, u)}</td>
+        <td>${fmtLen(c.dh_conn_center_mm, u)}</td>
+      </tr>
+    `).join("");
+    $("tableHost").innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>柱序</th>
+            <th>柱距（中心-中心）</th>
+            <th>柱長度</th>
+            <th>接點-中心 高低差</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  function renderSVG(res){
+    const W=297, H=210, margin=10;
+    const drawX=margin, drawY=margin, drawW=W-margin*2, drawH=H-margin*2;
+    const titleH = 12, dimH = 34;
+    const geomX = drawX, geomY = drawY + titleH, geomW = drawW, geomH = drawH - titleH - dimH;
+
+    const colB=res.colB, beamH=res.beamH;
+
+    const xMin = res.xOutL, xMax = res.xOutR;
+    const yMaxTop = Math.max(res.yOutL, res.yOutR, ...res.points.map(p=>p.y)) + beamH;
+    const yMin = 0, yMax = Math.max(1, yMaxTop);
+
+    const sx = geomW / (xMax - xMin);
+    const sy = geomH / (yMax - yMin);
+    const s  = Math.min(sx, sy);
+
+    const usedW = (xMax - xMin) * s;
+    const usedH = (yMax - yMin) * s;
+    const xPad = (geomW - usedW)/2;
+    const yPad = (geomH - usedH)/2;
+
+    function X(x){ return geomX + xPad + (x - xMin) * s; }
+    function Y(y){ return geomY + yPad + usedH - (y - yMin) * s; }
+
+    const yBase = Y(0);
+    const dimBase = drawY + drawH - 6;
+    const dimY2   = dimBase - 2;
+    const dimY1   = dimBase - 12;
+    const segDimY = dimBase - 22;
+
+    const bottomPts = [{x:res.xOutL, y:res.yOutL}, ...res.points, {x:res.xOutR, y:res.yOutR}];
+    const topPts    = bottomPts.map(p => ({x:p.x, y:p.y + beamH}));
+    const bottomStr = bottomPts.map(p => `${X(p.x)},${Y(p.y)}`).join(" ");
+    const topStr    = topPts.slice().reverse().map(p => `${X(p.x)},${Y(p.y)}`).join(" ");
+    const beamPoly = `<polygon points="${bottomStr} ${topStr}" fill="none" stroke="#0f172a" stroke-width="1.0" stroke-linejoin="miter" />`;
+
+    const colsSvg = res.points.map((p)=>{
+      const left = p.x - colB/2, right= p.x + colB/2;
+      return `
+        <rect x="${X(left)}" y="${Y(p.y)}" width="${(right-left)*s}" height="${(p.y-0)*s}" fill="none" stroke="#0f172a" stroke-width="0.8"/>
+        <circle cx="${X(p.x)}" cy="${Y(p.y)}" r="1.0" fill="#0f172a"/>
+      `;
+    }).join("");
+
+    const lrSideMid = (showDims && res.points.length <= 12) ? res.points.map((p)=>{
+      const xL = p.x - colB/2, xR = p.x + colB/2;
+      const yL = res.yAt(xL), yR = res.yAt(xR);
+      const yMidL = yL/2, yMidR = yR/2;
+      const out = colB * 0.35;
+      const xTextL = xL - out, xTextR = xR + out;
+      return `
+        <line x1="${X(xL)}" y1="${Y(yL)}" x2="${X(xTextL)}" y2="${Y(yMidL)}" stroke="#0f172a" stroke-width="0.25"/>
+        <text x="${X(xTextL)-1}" y="${Y(yMidL)+1}" font-size="3.0" text-anchor="end" fill="#0f172a">左 ${fmtLen(yL, res.unit)}</text>
+
+        <line x1="${X(xR)}" y1="${Y(yR)}" x2="${X(xTextR)}" y2="${Y(yMidR)}" stroke="#0f172a" stroke-width="0.25"/>
+        <text x="${X(xTextR)+1}" y="${Y(yMidR)+1}" font-size="3.0" text-anchor="start" fill="#0f172a">右 ${fmtLen(yR, res.unit)}</text>
+      `;
+    }).join("") : "";
+
+    const p1s = {x: X(res.xOutL), y: Y(res.yOutL)};
+    const p2s = {x: X(res.xOutR), y: Y(res.yOutR)};
+    const dxs = p2s.x - p1s.x, dys = p2s.y - p1s.y;
+    const lens = Math.hypot(dxs, dys) || 1;
+    const snx = -dys/lens, sny = dxs/lens;
+    const off = 22;
+    const A = { d1:{x:p1s.x+snx*off, y:p1s.y+sny*off}, d2:{x:p2s.x+snx*off, y:p2s.y+sny*off} };
+    const B = { d1:{x:p1s.x-snx*off, y:p1s.y-sny*off}, d2:{x:p2s.x-snx*off, y:p2s.y-sny*off} };
+    const best = (((A.d1.y+A.d2.y)/2) < ((B.d1.y+B.d2.y)/2)) ? A : B;
+    const tx = (best.d1.x + best.d2.x)/2;
+    const ty = (best.d1.y + best.d2.y)/2 - 3;
+
+    const xH = res.xOutL + 0.20 * (res.xOutR - res.xOutL);
+    const yH = res.yAt(xH);
+    const Hx = X(xH), Hy1 = Y(yH), Hy2 = Y(yH + beamH);
+
+    const segDims = (showDims && res.points.length <= 14) ? res.points.slice(1).map((p,i)=>{
+      const prev = res.points[i];
+      const x1 = X(prev.x), x2 = X(p.x);
+      const label = fmtLen(p.x - prev.x, res.unit);
+      return `
+        <line x1="${x1}" y1="${segDimY}" x2="${x2}" y2="${segDimY}" stroke="#0f172a" stroke-width="0.45"
+          marker-start="url(#tick)" marker-end="url(#tick)"/>
+        <text x="${(x1+x2)/2}" y="${segDimY-2}" font-size="3.0" text-anchor="middle" fill="#0f172a">${label}</text>
+      `;
+    }).join("") : "";
+
+    const xOutL = X(res.xOutL), xOutR = X(res.xOutR);
+    const xC1 = X(0), xC2 = X(res.L);
+
+    const title = `${res.hb.label}　|　斜度 ${isF(res.slopePct)?res.slopePct.toFixed(3):"—"}% / ${isF(res.angleDeg)?res.angleDeg.toFixed(2):"—"}°`;
+
+    $("svgHost").innerHTML = `
+      <svg id="drawingSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="100%" height="auto">
+        <defs>
+          <marker id="tick" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,6 L6,0" stroke="#0f172a" stroke-width="1.0" fill="none"/>
+          </marker>
+        </defs>
+
+        <rect x="${margin}" y="${margin}" width="${W-margin*2}" height="${H-margin*2}" fill="none" stroke="#0f172a" stroke-width="0.6"/>
+        <rect x="${drawX}" y="${drawY}" width="${drawW}" height="${drawH}" fill="none" stroke="#0f172a" stroke-width="0.35"/>
+
+        <text x="${drawX}" y="${drawY+6}" font-size="3.6" fill="#0f172a">${title}</text>
+
+        ${colsSvg}
+        ${beamPoly}
+
+        ${segDims}
+
+        <line x1="${xOutL}" y1="${dimY1}" x2="${xOutR}" y2="${dimY1}" stroke="#0f172a" stroke-width="0.55"
+          marker-start="url(#tick)" marker-end="url(#tick)"/>
+        <line x1="${xOutL}" y1="${yBase}" x2="${xOutL}" y2="${dimY1-1}" stroke="#0f172a" stroke-width="0.3"/>
+        <line x1="${xOutR}" y1="${yBase}" x2="${xOutR}" y2="${dimY1-1}" stroke="#0f172a" stroke-width="0.3"/>
+        <text x="${(xOutL+xOutR)/2}" y="${dimY1+4}" font-size="3.4" text-anchor="middle" fill="#0f172a">
+          包外 = ${fmtLen(res.L_out, res.unit)}
+        </text>
+
+        <line x1="${xC1}" y1="${dimY2}" x2="${xC2}" y2="${dimY2}" stroke="#0f172a" stroke-width="0.55"
+          marker-start="url(#tick)" marker-end="url(#tick)"/>
+        <line x1="${xC1}" y1="${yBase}" x2="${xC1}" y2="${dimY2-1}" stroke="#0f172a" stroke-width="0.3"/>
+        <line x1="${xC2}" y1="${yBase}" x2="${xC2}" y2="${dimY2-1}" stroke="#0f172a" stroke-width="0.3"/>
+        <text x="${(xC1+xC2)/2}" y="${dimY2+4}" font-size="3.4" text-anchor="middle" fill="#0f172a">
+          柱心-柱心 = ${fmtLen(res.L, res.unit)}
+        </text>
+
+        <line x1="${p1s.x}" y1="${p1s.y}" x2="${best.d1.x}" y2="${best.d1.y}" stroke="#0f172a" stroke-width="0.3"/>
+        <line x1="${p2s.x}" y1="${p2s.y}" x2="${best.d2.x}" y2="${best.d2.y}" stroke="#0f172a" stroke-width="0.3"/>
+        <line x1="${best.d1.x}" y1="${best.d1.y}" x2="${best.d2.x}" y2="${best.d2.y}" stroke="#0f172a" stroke-width="0.55"
+          marker-start="url(#tick)" marker-end="url(#tick)"/>
+        <text x="${tx}" y="${ty}" font-size="3.4" text-anchor="middle" fill="#0f172a">
+          包外斜長 = ${fmtLen(res.slant_out, res.unit)}
+        </text>
+
+        <line x1="${Hx}" y1="${Hy1}" x2="${Hx}" y2="${Hy2}" stroke="#0f172a" stroke-width="0.55"
+          marker-start="url(#tick)" marker-end="url(#tick)"/>
+        <text x="${Hx+6}" y="${(Hy1+Hy2)/2+1}" font-size="3.4" text-anchor="start" fill="#0f172a">
+          H = ${beamH} mm
+        </text>
+
+        ${lrSideMid}
+      </svg>
+    `;
+  }
+
+  // ---------- 算料（最省：小件數精確解） ----------
+  function getStockSizesMM(){
+    const arr = [];
+    if($("stock9").checked) arr.push(9000);
+    if($("stock10").checked) arr.push(10000);
+    if($("stock12").checked) arr.push(12000);
+    return arr.sort((a,b)=>a-b);
+  }
+
+  function scorePlan(plan){ return [plan.totalWaste, plan.totalBars, plan.totalPurchased]; }
+  function betterScore(a,b){
+    for(let i=0;i<a.length;i++){
+      if(a[i] !== b[i]) return a[i] < b[i];
+    }
+    return false;
+  }
+
+  function finalizeBars(bars){
+    let totalWaste = 0;
+    let totalPurchased = 0;
+    const countBySize = {};
+    for(const b of bars){
+      b.waste = b.remain;
+      totalWaste += b.waste;
+      totalPurchased += b.size;
+      countBySize[b.size] = (countBySize[b.size]||0) + 1;
+    }
+
+    const patterns = new Map();
+    for(const b of bars){
+      const cutsSorted = b.cuts.slice().sort((a,b)=>b-a);
+      const key = `${b.size}|${cutsSorted.join("+")}|w${b.waste}`;
+      if(!patterns.has(key)){
+        patterns.set(key, { count:0, size:b.size, cuts:cutsSorted, waste:b.waste });
+      }
+      patterns.get(key).count += 1;
+    }
+
+    return {
+      ok:true,
+      bars,
+      patterns: Array.from(patterns.values()).sort((a,b)=>{
+        if(b.count !== a.count) return b.count - a.count;
+        return a.waste - b.waste;
+      }),
+      totalWaste,
+      totalPurchased,
+      totalBars: bars.length,
+      countBySize
+    };
+  }
+
+  // 啟發式：Best-Fit Decreasing
+  function packPiecesBestFit(pieces, stockSizes){
+    const ps = pieces.slice().sort((a,b)=>b-a);
+    const bars = [];
+
+    for(const p of ps){
+      let bestIdx = -1;
+      let bestRemainAfter = Infinity;
+
+      for(let i=0;i<bars.length;i++){
+        const b = bars[i];
+        if(b.remain >= p){
+          const ra = b.remain - p;
+          if(ra < bestRemainAfter){
+            bestRemainAfter = ra;
+            bestIdx = i;
+          }
+        }
+      }
+
+      if(bestIdx >= 0){
+        const b = bars[bestIdx];
+        b.cuts.push(p);
+        b.remain -= p;
+        continue;
+      }
+
+      let chosen = null;
+      for(const s of stockSizes){
+        if(s >= p){
+          const remainAfter = s - p;
+          if(!chosen || remainAfter < chosen.remainAfter || (remainAfter === chosen.remainAfter && s < chosen.size)){
+            chosen = { size:s, remainAfter };
+          }
+        }
+      }
+      if(!chosen) return { ok:false, reason:`需求段長 ${p}mm 超過可用棒材最大長度` };
+
+      bars.push({ size: chosen.size, remain: chosen.size - p, cuts:[p] });
+    }
+
+    return finalizeBars(bars);
+  }
+
+  // 精確解：Branch & Bound（小件數保證最省）
+  function packPiecesExact(pieces, stockSizes){
+    const ps = pieces.slice().sort((a,b)=>b-a);
+    if(ps.length === 0) return finalizeBars([]);
+
+    const maxStock = Math.max(...stockSizes);
+    if(ps[0] > maxStock) return { ok:false, reason:`需求段長 ${ps[0]}mm 超過可用棒材最大長度` };
+
+    let bestBars = null;
+    let bestScoreArr = null;
+
+    const bars = []; // {size, remain, cuts}
+
+    function dfs(i){
+      if(i === ps.length){
+        const plan = finalizeBars(bars.map(b=>({size:b.size, remain:b.remain, cuts:b.cuts.slice()})));
+        const sc = scorePlan(plan);
+        if(!bestBars || betterScore(sc, bestScoreArr)){
+          bestBars = plan.bars;
+          bestScoreArr = sc;
+        }
+        return;
+      }
+
+      const p = ps[i];
+
+      // 支數剪枝（保守）
+      if(bestBars && bars.length > bestBars.length + 1) return;
+
+      // 先嘗試放到現有棒材：remain 越小越先試（越貼合越好）
+      const idxs = bars.map((b,idx)=>({idx, remain:b.remain})).sort((a,b)=>a.remain-b.remain).map(x=>x.idx);
+      const seen = new Set();
+
+      for(const bi of idxs){
+        const b = bars[bi];
+        if(b.remain < p) continue;
+
+        const k = `${b.size}|${b.remain}`;
+        if(seen.has(k)) continue; // 對稱剪枝
+        seen.add(k);
+
+        b.cuts.push(p);
+        b.remain -= p;
+        dfs(i+1);
+        b.remain += p;
+        b.cuts.pop();
+
+        if(b.remain === 0) return; // 完美貼合，該層不必再試其他
+      }
+
+      // 開新棒材：從小到大（同剩料時偏短棒材）
+      for(const s of stockSizes){
+        if(s < p) continue;
+
+        bars.push({ size:s, remain:s-p, cuts:[p] });
+        if(!bestBars || bars.length <= bestBars.length + 1){
+          dfs(i+1);
+        }
+        bars.pop();
+
+        if(s === p) break;
+      }
+    }
+
+    dfs(0);
+    if(!bestBars) return { ok:false, reason:"無法生成切割方案" };
+
+    return finalizeBars(bestBars.map(b=>({size:b.size, remain:b.remain, cuts:b.cuts})));
+  }
+
+  // 主入口：單一/兩兩/全混用取最省；小件數用精確解
+  function optimizeCut(pieces, stockSizes){
+    const uniqSizes = stockSizes.slice().sort((a,b)=>a-b);
+    if(uniqSizes.length === 0) return { ok:false, reason:"未選擇任何棒材長度（9/10/12m）" };
+
+    const candidates = [];
+    for(let i=0;i<uniqSizes.length;i++) candidates.push([uniqSizes[i]]);
+    for(let i=0;i<uniqSizes.length;i++){
+      for(let j=i+1;j<uniqSizes.length;j++) candidates.push([uniqSizes[i], uniqSizes[j]]);
+    }
+    if(uniqSizes.length >= 3) candidates.push(uniqSizes);
+
+    const EXACT_LIMIT = 22;
+
+    let best = null;
+    let bestScoreArr = null;
+
+    for(const c of candidates){
+      const plan = (pieces.length <= EXACT_LIMIT)
+        ? packPiecesExact(pieces, c)
+        : packPiecesBestFit(pieces, c);
+
+      if(!plan.ok) continue;
+
+      const sc = scorePlan(plan);
+      if(!best || betterScore(sc, bestScoreArr)){
+        best = { ...plan, usedSizes:c.slice() };
+        bestScoreArr = sc;
+      }
+    }
+
+    return best || { ok:false, reason:"無法生成切割方案（請確認棒材長度或輸入）" };
+  }
+
+  function renderCutCard(title, pieces, plan, unit){
+    const mmToUnit = (mm)=> unit==="m" ? (mm/1000).toFixed(4) : (mm).toFixed(1);
+    const u = unit;
+
+    if(!plan.ok){
+      return `
+        <div class="subcard">
+          <h3>${title}</h3>
+          <div class="warn">⚠️ ${plan.reason}</div>
+        </div>
+      `;
+    }
+
+    const wastePct = plan.totalPurchased > 0 ? (plan.totalWaste / plan.totalPurchased * 100) : 0;
+    const usedSizesTxt = plan.usedSizes.map(s=> (s/1000).toFixed(0)+"m").join(" + ");
+    const sizeSummary = Object.keys(plan.countBySize).sort((a,b)=>+a-+b).map(k=>{
+      return `${(+k/1000).toFixed(0)}m×${plan.countBySize[k]}`;
+    }).join("、");
+
+    const topPatterns = plan.patterns.slice(0, 12).map(p=>{
+      const cutsTxt = p.cuts.map(x=>mmToUnit(x)+" "+u).join(" + ");
+      const wTxt = mmToUnit(p.waste)+" "+u;
+      return `<tr>
+        <td class="mono">${p.count}支</td>
+        <td class="mono">${(p.size/1000).toFixed(0)}m</td>
+        <td class="mono">${cutsTxt}</td>
+        <td class="mono">${wTxt}</td>
+      </tr>`;
+    }).join("");
+
+    const needTotal = pieces.reduce((a,b)=>a+b,0);
+    return `
+      <div class="subcard">
+        <h3>${title}</h3>
+        <div class="small">
+          方案（允許：${usedSizesTxt}）｜使用：${sizeSummary}<br/>
+          需求總長：<span class="mono">${mmToUnit(needTotal)} ${u}</span>　
+          購料總長：<span class="mono">${mmToUnit(plan.totalPurchased)} ${u}</span>　
+          廢料：<span class="mono">${mmToUnit(plan.totalWaste)} ${u}</span>（<span class="mono">${wastePct.toFixed(2)}%</span>）
+        </div>
+
+        <div style="margin-top:10px">
+          <table>
+            <thead>
+              <tr>
+                <th>數量</th>
+                <th>棒材</th>
+                <th>切割</th>
+                <th>餘料</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${topPatterns || `<tr><td colspan="4">—</td></tr>`}
+            </tbody>
+          </table>
+          <div class="small" style="margin-top:6px;">（只顯示前 12 種切割型；同型會合併計數）</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildCutting(res){
+    const stockSizes = getStockSizesMM();
+    const unit = res.unit;
+
+    // ✅ 切損忽略
+    const kerf = 0;
+
+    const beamQty = Math.max(0, Math.floor((num($("beamQty").value) || 1)));
+    const colMul  = Math.max(0, Math.floor((num($("colQtyMul").value) || 1)));
+
+    const colPieces = res.cols
+      .map(c => c.col_len_material_mm + kerf)
+      .flatMap(len => Array(colMul).fill(len));
+
+    const beamPieces = Array(beamQty).fill(res.slant_out + kerf);
+
+    const out = [];
+
+    if(res.cols.length > 0 && colPieces.length > 0){
+      const colPlan = optimizeCut(colPieces, stockSizes);
+      out.push(renderCutCard("柱子算料", colPieces, colPlan, unit));
+    } else {
+      out.push(`<div class="subcard"><h3>柱子算料</h3><div class="small">尚未有柱高資料（請先輸入）。</div></div>`);
+    }
+
+    if(isF(res.slant_out) && res.slant_out > 0 && beamQty > 0){
+      const beamPlan = optimizeCut(beamPieces, stockSizes);
+      out.push(renderCutCard("斜梁算料（包外斜長）", beamPieces, beamPlan, unit));
+    } else {
+      out.push(`<div class="subcard"><h3>斜梁算料（包外斜長）</h3><div class="small">尚未有斜梁長度（請先輸入 L 與柱高）。</div></div>`);
+    }
+
+    $("cutHost").innerHTML = out.join("");
+  }
+
+  function render(res){
+    if(res.warnings.length){
+      $("warning").style.display = "";
+      $("warning").textContent = "⚠️ " + res.warnings.join(" / ");
+    } else {
+      $("warning").style.display = "none";
+      $("warning").textContent = "";
+    }
+    renderTable(res);
+    $("resultHost").innerHTML = `<span>包外斜長：</span>${fmtLen(res.slant_out, res.unit)}`;
+    renderSVG(res);
+    buildCutting(res);
+  }
+
+  function downloadText(filename, content, mime){
+    const blob = new Blob([content], {type:mime || "text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
+  function exportCSV(res){
+    const u = res.unit;
+    const rows = [["index","spacing_"+u,"column_length_"+u,"dh_conn_minus_center_"+u]];
+    res.cols.forEach(c=>{
+      const dx = isF(c.dx_mm) ? ((u==="m") ? c.dx_mm/1000 : c.dx_mm) : "";
+      const len= (u==="m") ? c.col_len_material_mm/1000 : c.col_len_material_mm;
+      const dh = (u==="m") ? c.dh_conn_center_mm/1000 : c.dh_conn_center_mm;
+      rows.push([c.index, dx, len, dh]);
+    });
+    downloadText("columns.csv", rows.map(r=>r.join(",")).join("\n"), "text/csv;charset=utf-8");
+  }
+  function exportSVG(){
+    const svg = $("drawingSvg");
+    if(!svg) return;
+    const content = new XMLSerializer().serializeToString(svg);
+    downloadText("drawing.svg", content, "image/svg+xml;charset=utf-8");
+  }
+  function exportPNG(){
+    const svg = $("drawingSvg");
+    if(!svg) return;
+    const svgText = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([svgText], {type:"image/svg+xml;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      const scale = 4;
+      const canvas = document.createElement("canvas");
+      canvas.width = 297*10*scale;
+      canvas.height= 210*10*scale;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle="white"; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      canvas.toBlob((pngBlob)=>{
+        const pngUrl = URL.createObjectURL(pngBlob);
+        const a = document.createElement("a");
+        a.href=pngUrl; a.download="drawing.png"; a.click();
+        URL.revokeObjectURL(pngUrl);
+        URL.revokeObjectURL(url);
+      }, "image/png");
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); alert("PNG 匯出失敗，請用 SVG 或列印成 PDF。"); };
+    img.src = url;
+  }
+
+  function recalc(){
+    lastRes = compute();
+    render(lastRes);
+  }
+
+  $("mode_count").addEventListener("click", ()=>setMode("count"));
+  $("mode_heights").addEventListener("click", ()=>setMode("heights"));
+
+  [
+    "unit","L","N","Hlow","Hhigh","Hlist","hSpec","beamH","colB",
+    "stock9","stock10","stock12","beamQty","colQtyMul"
+  ].forEach(id=>{
+    const el = $(id);
+    if(!el) return;
+    el.addEventListener("input", recalc);
+    el.addEventListener("change", recalc);
+  });
+
+  $("hSpec").addEventListener("change", ()=>{
+    $("customHB").style.display = ($("hSpec").value==="CUSTOM") ? "" : "none";
+    recalc();
+  });
+
+  $("recalc").addEventListener("click", recalc);
+  $("reset").addEventListener("click", ()=>{
+    $("unit").value="mm";
+    $("L").value="";
+    $("hSpec").value="H100";
+    $("customHB").style.display="none";
+    $("beamH").value="";
+    $("colB").value="";
+    $("N").value="";
+    $("Hlow").value="";
+    $("Hhigh").value="";
+    $("Hlist").value="";
+    $("stock9").checked=true;
+    $("stock10").checked=true;
+    $("stock12").checked=true;
+    $("beamQty").value="";
+    $("colQtyMul").value="";
+    setMode("count");
+    recalc();
+  });
+
+  $("btn_print").addEventListener("click", ()=>window.print());
+  $("btn_svg").addEventListener("click", exportSVG);
+  $("btn_png").addEventListener("click", exportPNG);
+  $("btn_csv").addEventListener("click", ()=>exportCSV(lastRes));
+
+  recalc();
+})();
+
+</script>
+
 </body>
 </html>
